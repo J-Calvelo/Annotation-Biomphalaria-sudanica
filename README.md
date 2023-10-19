@@ -30,7 +30,7 @@ Generates a custom summary of EarlGrey results
 #### Other Variables:
 - NA
 
-# 3) CLEAN_PACBIO_READS
+### 3) CLEAN_PACBIO_READS
 Setting this variable to TRUE will run will retrieve full sequenced isoforms from the PACBIO CSS reads based on the presence of 5' and 3' isoforms
 Setting CLEAN_PACBIO_READS_RM_TM to TRUE will also remove intermediary files.
 #### Required software: 
@@ -42,7 +42,7 @@ Setting CLEAN_PACBIO_READS_RM_TM to TRUE will also remove intermediary files.
 - raw_pacbio_reads: Full path to the PACBIO CCS reads file (BAM Format)
 - pacbio_primers: Full path to a file with the adapter sequences of the PACBIO CCS readss (FASTA Format)
   
-# 4) CLEAN_ILLUMINA_READS 
+### 4) CLEAN_ILLUMINA_READS 
 Setting this variable to TRUE will remove adapter sequences and low quality bases from the paired end Illumina reads using trimmomatic (SLIDINGWINDOW:5:20 MINLEN:25)
 #### Required software: 
 - trimmomatic (https://github.com/usadellab/Trimmomatic)
@@ -54,7 +54,7 @@ Setting this variable to TRUE will remove adapter sequences and low quality base
 Note: Sample names are identified running the comand:
 ls $raw_illumina_reads_dir"/"*$raw_illumina_1 | sed "s/.*\///" | sed "s/$raw_illumina_1//"
 
-# 5) PACBIO_MAP
+### 5) PACBIO_MAP
 Setting this variable to TRUE will map the PACBIO reads to the genome
 #### Required software: 
 - minimap2 (https://github.com/lh3/minimap2)
@@ -62,14 +62,14 @@ Setting this variable to TRUE will map the PACBIO reads to the genome
 #### Other Variables:
 - NA
 
-# 6) STAR_MAP
+### 6) STAR_MAP
 Setting this variable to TRUE will map the Illuimina reads to the genome
 #### Required software: 
 - STAR (https://github.com/alexdobin/STAR/tree/master)
 #### Other Variables:
 - NA
 
-# 7) STRINGTIE_TRANS
+### 7) STRINGTIE_TRANS
 Setting this variable to TRUE will combine the read mappings of Illumina and PACBIO reads to annotate the genome using Stringtie v2.2
 Earlier versions of stringtie will not work
 #### Required software: 
@@ -81,7 +81,7 @@ Earlier versions of stringtie will not work
 Note: This block has the function kill_fai that will remove any index file of the genome that could cause problems with gffread
 Command: rm $genome_file".fai"
 
-# 8) FIND_MITOCHONDRIA 
+### 8) FIND_MITOCHONDRIA 
 Setting this variable to TRUE will try to identify the mitochondrial genome in the genome assembly based on blast searches against known mitochondrial gene sequences of other biomphalaria. 
 Setting FIND_MITOCHONDRIA_RM_TM to TRUE will also remove intermediary files.
 #### Required software: 
@@ -91,7 +91,7 @@ Setting FIND_MITOCHONDRIA_RM_TM to TRUE will also remove intermediary files.
 
 Note: Other blocks working with the mitochondria will assume that it's sequence was retrieved and annotated by means not included on this pipeline.
 
-# 9) MAP_MITOCHONDRIA_PACBIO
+### 9) MAP_MITOCHONDRIA_PACBIO
 Setting this variable to TRUE will map PACBIO reads to the mitochondrial genome and count reads asigned to the different features. 
 #### Required software: 
 - minimap2 (https://github.com/lh3/minimap2)
@@ -101,7 +101,7 @@ Setting this variable to TRUE will map PACBIO reads to the mitochondrial genome 
 - mito_genome: Full path to a fasta file with the conting/scaffold with the mitochondrial genome
 - mito_gff: Full path to a GFF file with annotated mitochondrial genome
 
-# 10) MAP_MITOCHONDRIA_ILLUMINA
+### 10) MAP_MITOCHONDRIA_ILLUMINA
 Setting this variable to TRUE will map paired Illumina reads to the mitochondrial genome and count reads asigned to the different features. 
 #### Required software: 
 - STAR (https://github.com/alexdobin/STAR/tree/master)
@@ -113,7 +113,7 @@ Setting this variable to TRUE will map paired Illumina reads to the mitochondria
 
 Note: For convininence mito_htseq_illumina_gff has every feature identidied as a "gene" (third column of the gff) to better identify reads that overlap different features.
 
-# 11) MAP_MITOCHONDRIA_ILLUMINA_NEW_ORIGIN
+### 11) MAP_MITOCHONDRIA_ILLUMINA_NEW_ORIGIN
 Setting this variable to TRUE will run the same analysis than MAP_MITOCHONDRIA_ILLUMINA but over a genome file with a different origin coordinate
 #### Required software: 
 - STAR (https://github.com/alexdobin/STAR/tree/master)
@@ -125,7 +125,7 @@ Setting this variable to TRUE will run the same analysis than MAP_MITOCHONDRIA_I
 
 Note: This was done for quality control
 
-# 12) ORF_PROT_SEQ_1
+### 12) ORF_PROT_SEQ_1
 Setting this variable to TRUE will run the first half of Transdecoder pipeline for the identification of ORFs in the transcriptome predicted with STRINGTIE_TRANS
 #### Required software: 
 - Transdecoder (https://github.com/TransDecoder/TransDecoder)
@@ -137,7 +137,7 @@ Setting this variable to TRUE will run the first half of Transdecoder pipeline f
 - pfam: Full path to hmmer frofiles from Pfam-A
 - exclude_mitochondria: ID of the contig or scaffold that contains the mitochondrial genome. Any transcript assigned to it will not be analysed by trans-decoder
 
-# 13) ORF_PROT_SEQ_2
+### 13) ORF_PROT_SEQ_2
 Setting this variable to TRUE will run the second half of Transdecoder pipeline for the identification of ORFs in the transcriptome predicted with STRINGTIE_TRANS
 #### Required software: 
 - Transdecoder (https://github.com/TransDecoder/TransDecoder)
@@ -150,21 +150,21 @@ In addition it will remove temporary files in the working directory generated by
   rm pipeliner.*
   mv PolyA_Transcripts_work* $work_dir"/TransDecoder/Predict"
 
-# 11) BUSCO_TESTS
+### 11) BUSCO_TESTS
 Setting this variable to TRUE will evaluate how complete are the genome assembly and the predicted transcriptome and proteome using BUSCO (-l mollusca). Which of the three is to be run can be adjusted with variables: BUSCO_GENOME, BUSCO_RNA and BUSCO_PROT_ALL
 #### Required software: 
 - Busco (http://busco.ezlab.org/)
 #### Other Variables:
 -NA
 
-# 12) RUN_INTERPROT
+### 12) RUN_INTERPROT
 Setting this variable to TRUE will annotate the predicted proteins by identifying protein domain signatures 
 #### Required software: 
 - interproscan (https://github.com/ebi-pf-team/interproscan)
 #### Other Variables:
 - interprot_path: Full path to the folder of the Interpro installation
 
-# 13) RUN_EGGNOG
+### 13) RUN_EGGNOG
 Setting this variable to TRUE will assign GO terms to the predicted proteins using eggnog mapper
 #### Required software:
 - eggnog-mapper (https://github.com/eggnogdb/eggnog-mapper/tree/master)
@@ -178,14 +178,14 @@ Setting this variable to TRUE will identify tRNA loci in the genome
 #### Other Variables:
 - NA
 
-# 17) RUN_RIBOSOME
+### 17) RUN_RIBOSOME
 Setting this variable to TRUE will identify rRNA loci in the genome
 #### Required software:
 - barrnap (https://github.com/tseemann/barrnap)
 #### Other Variables:
 - NA
 
-# 18) SEARCH_SIGNALS
+### 18) SEARCH_SIGNALS
 Setting this variable to TRUE will identify signal peptides and mitochondrial taegeting peptides among the predicted proteins
 #### Required software:
 - signalp6 (https://github.com/fteufel/signalp-6.0)
