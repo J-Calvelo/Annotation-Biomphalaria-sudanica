@@ -5,7 +5,7 @@ The script is subdevided into several blocks of analysis and/or file preparation
 
 ### 1) CLEAN_RUN
 Setting this variable to TRUE will remove all previous runs. Us only to start from a clean state:
-Required software: 
+#### Required software: 
 - NA
 
 ### 2) TEA_EARLGREY_HOT
