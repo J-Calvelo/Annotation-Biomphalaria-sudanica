@@ -1,57 +1,150 @@
 # Annotation-Biomphalaria-sudanica
 Bioinformatic pipline utiliced in XXXXXX for the annotation of Biomphalaria sudanica.
 
-The script is subdevided into several blocks of analysis and/or file preparation in order to facilitate re-runs. Which blocks are ran at a time can be controlled by setting to true variables located from lines 12 to 120 (all written in all caps):
+The script is subdevided into several blocks of analysis and/or file preparation in order to facilitate re-runs. Which blocks are ran at a time can be controlled by setting to true variables located from lines 12 to 120 (all written in all caps). Other important variables for the run are located betwee lines 123 to 200. Some will be discussed now while others more specific will be mentioned as they become relevant:
+
+### General variables:
+1) species_name: Name for the species being annotated
+2) genome_file: Full path to the genome assembly in fasta format
+3) work_dir: Full path to the working directory (needs to exists
+4) threads: Number of computer cores available for the analysis. Used whenever possible.
 
 ### 1) CLEAN_RUN
 Setting this variable to TRUE will remove all previous runs. Us only to start from a clean state:
 #### Required software: 
 - NA
-
+#### Other Variables:
+- NA
+ 
 ### 2) TEA_EARLGREY_HOT
 Setting this variable to TRUE will run the earlGrey pipeline for repeat annotation
-Re
+#### Required software: 
+- EarlGrey (https://github.com/google/EarlGrey)
+#### Other Variables: 
+earlgrey_instalation: Full path to EarlGrey
 
-# Requires the conda enviroment earlGrey active: conda activate earlGrey. And the following additions to the PATH: PATH=$PATH:/home/amanda/programas/RECON-1.08/bin:/home/amanda/programas/rmblast-2.11.0/bin:/home/amanda/programas/RepeatScout-1.0.6:/home/amanda/programas/RepeatMasker:/home/amanda/programas/RepeatMasker/util:/home/amanda/programas/ucscTwoBitTools:/home/amanda/programas/RepeatModeler-2.0.2a:/home/amanda/programas/EarlGrey
-  TEA_EARLGREY_SUMMARY=FALSE # my Summary for the repeats
+### 3) TEA_EARLGREY_SUMMARY
+Generates a custom summary of EarlGrey results
+#### Required software: 
+- NA
+#### Other Variables:
+- NA
 
-# 3) Pacbio Cleaning
-CLEAN_PACBIO_READS=FALSE # Requires the conda environment TAMA: conda activate TAMA
-  CLEAN_PACBIO_READS_RM_TM=FALSE # Remove intermediary files
+# 3) CLEAN_PACBIO_READS
+Setting this variable to TRUE will run will retrieve full sequenced isoforms from the PACBIO CSS reads based on the presence of 5' and 3' isoforms
+Setting CLEAN_PACBIO_READS_RM_TM to TRUE will also remove intermediary files.
+#### Required software: 
+- lima (https://github.com/PacificBiosciences/barcoding)
+- isoseq3 (https://github.com/PacificBiosciences/IsoSeq)
+- bam2fastq (https://github.com/jts/bam2fastq)
+- seqkit (https://github.com/shenwei356/seqkit)
+#### Other Variables:
+- raw_pacbio_reads: Full path to the PACBIO CCS reads file (BAM Format)
+- pacbio_primers: Full path to a file with the adapter sequences of the PACBIO CCS readss (FASTA Format)
+  
+# 4) CLEAN_ILLUMINA_READS 
+Setting this variable to TRUE will remove adapter sequences and low quality bases from the paired end Illumina reads using trimmomatic (SLIDINGWINDOW:5:20 MINLEN:25)
+#### Required software: 
+- trimmomatic (https://github.com/usadellab/Trimmomatic)
+- seqkit (https://github.com/shenwei356/seqkit)
+#### Other Variables:
+- raw_illumina_reads_dir: Full path to the folder with the Illumina read files 
+- raw_illumina_1: Identifier for the Left reads, located at the end of the file 
+- raw_illumina_2: Identifier for the Left reads, located at the end of the file
+Note: Sample names are identified running the comand:
+ls $raw_illumina_reads_dir"/"*$raw_illumina_1 | sed "s/.*\///" | sed "s/$raw_illumina_1//"
 
-# 4) Illumina Reads Cleaning # Requires the conda environment Mixed_Transcriptome: conda activate Mixed_Transcriptome
-CLEAN_ILLUMINA_READS=FALSE
+# 5) PACBIO_MAP
+Setting this variable to TRUE will map the PACBIO reads to the genome
+#### Required software: 
+- minimap2 (https://github.com/lh3/minimap2)
+- samtools (https://github.com/samtools/samtools)
+#### Other Variables:
+- NA
 
-# 5) PACbio Mappings # Requires the conda environment TAMA: conda activate TAMA
-PACBIO_MAP=FALSE
+# 6) STAR_MAP
+Setting this variable to TRUE will map the Illuimina reads to the genome
+#### Required software: 
+- STAR (https://github.com/alexdobin/STAR/tree/master)
+#### Other Variables:
+- NA
 
-# 6) STAR Mappings # Requires the conda environment Mixed_Transcriptome: conda activate Mixed_Transcriptome
-STAR_MAP=FALSE
+# 7) STRINGTIE_TRANS
+Setting this variable to TRUE will combine the read mappings of Illumina and PACBIO reads to annotate the genome using Stringtie v2.2
+Earlier versions of stringtie will not work
+#### Required software: 
+- stringtie (https://github.com/gpertea/stringtie)
+- gffread (https://github.com/gpertea/gffread)
+#### Other Variables:
+- NA
 
-# 7) Stringtie Annotation # Requires the conda environment Mixed_Transcriptome: conda activate Mixed_Transcriptome
-STRINGTIE_TRANS=FALSE
+Note: This block has the function kill_fai that will remove any index file of the genome that could cause problems with gffread
+Command: rm $genome_file".fai"
 
-# 8) Busco evaluation # Requires the conda environment Busco: conda activate Busco
-BUSCO_TESTS=FALSE
-  BUSCO_GENOME=FALSE # Runs the busco for the entire genome
-  BUSCO_RNA=FALSE # Runs the busco for the transcriptome
-  BUSCO_PROT_ALL=FALSE # Runs the busco for the predicted proteins
+# 8) FIND_MITOCHONDRIA 
+Setting this variable to TRUE will try to identify the mitochondrial genome in the genome assembly based on blast searches against known mitochondrial gene sequences of other biomphalaria. 
+Setting FIND_MITOCHONDRIA_RM_TM to TRUE will also remove intermediary files.
+#### Required software: 
+- BLAST+ (http://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs)
+#### Other Variables:
+- mito_genes: Full path to a fasta file with known mitochondrial genes
 
-# 9) Find Mitochondria # Requires the basic conda environment: conda activate
-FIND_MITOCHONDRIA=FALSE
-  FIND_MITOCHONDRIA_RM_TM=FALSE # Removes the blast reference
+Note: Other blocks working with the mitochondria will assume that it's sequence was retrieved and annotated by means not included on this pipeline.
 
-# 10) Map reads to Mitochondria PACBIO # Requires the conda environment TAMA: conda activate TAMA
-MAP_MITOCHONDRIA_PACBIO=FALSE
-MAP_MITOCHONDRIA_PACBIO_NEW_ORIGIN=FALSE # Confirm that the change in the origin didn't affected the read mapping counts
+# 9) MAP_MITOCHONDRIA_PACBIO
+Setting this variable to TRUE will map PACBIO reads to the mitochondrial genome and count reads asigned to the different features. 
+#### Required software: 
+- minimap2 (https://github.com/lh3/minimap2)
+- samtools (https://github.com/samtools/samtools)
+- htseq-count (https://github.com/htseq/htseq)
+#### Other Variables:
+- mito_genome: Full path to a fasta file with the conting/scaffold with the mitochondrial genome
+- mito_gff: Full path to a GFF file with annotated mitochondrial genome
 
-# 11) Map reads to Mitochondria ILLUMINA #  Requires the basic conda environment: conda activate
-MAP_MITOCHONDRIA_ILLUMINA=FALSE
-MAP_MITOCHONDRIA_ILLUMINA_NEW_ORIGIN=FALSE # Confirm that the change in the origin didn't affected the read mapping counts
+# 10) MAP_MITOCHONDRIA_ILLUMINA
+Setting this variable to TRUE will map paired Illumina reads to the mitochondrial genome and count reads asigned to the different features. 
+#### Required software: 
+- STAR (https://github.com/alexdobin/STAR/tree/master)
+- samtools (https://github.com/samtools/samtools)
+- htseq-count (https://github.com/htseq/htseq)
+#### Other Variables:
+- mito_genome: Full path to a fasta file with the conting/scaffold with the mitochondrial genome
+- mito_htseq_illumina_gff: Full path to a GFF file with annotated mitochondrial genome
 
-# 12) Get ORFs  #  Requires the basic conda environment: conda activate
+Note: For convininence mito_htseq_illumina_gff has every feature identidied as a "gene" (third column of the gff) to better identify reads that overlap different features.
+
+# 11) MAP_MITOCHONDRIA_ILLUMINA_NEW_ORIGIN
+Setting this variable to TRUE will run the same analysis than MAP_MITOCHONDRIA_ILLUMINA but over a genome file with a different origin coordinate
+#### Required software: 
+- STAR (https://github.com/alexdobin/STAR/tree/master)
+- samtools (https://github.com/samtools/samtools)
+- htseq-count (https://github.com/htseq/htseq)
+#### Other Variables:
+new_ori_genome: Full path to a fasta file with the conting/scaffold with the mitochondrial genome
+new_ori_htseq_illumina_gff: Full path to a GFF file with annotated mitochondrial genome
+
+Note: This was done for quality controlls
+
+# 12) ORF_PROT_SEQ_1
+Setting this variable to TRUE will run half of Transdecoder pipeline for the identification of ORFs in the transcriptome predicted with STRINGTIE_TRANS
+#### Required software: 
+- Transdecoder (https://github.com/TransDecoder/TransDecoder)
+- 
+
+
 ORF_PROT_SEQ_1=FALSE # runs the necessary predictions and tests
+
+
+
+
 ORF_PROT_SEQ_2=FALSE # Predicts the Proteins
+
+# 11) BUSCO_TESTS
+Setting this variable to TRUE will evaluate how complete are the genome assembly and the predicted transcriptome and proteome using BUSCO. Which of the three is to be run can be adjusted with variables: BUSCO_GENOME, BUSCO_RNA and BUSCO_PROT_ALL
+#### Required software: 
+- Busco (http://busco.ezlab.org/)
+
+
 
 # 13) Interprot # Requires the conda environment: conda activate Interprot
 RUN_INTERPROT=FALSE
