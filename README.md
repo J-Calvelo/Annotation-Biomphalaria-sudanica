@@ -10,7 +10,7 @@ The script is subdevided into several blocks of analysis and/or file preparation
 4) threads: Number of computer cores available for the analysis. Used whenever possible.
 
 ### 1) CLEAN_RUN
-Setting this variable to TRUE will remove all previous runs. Us only to start from a clean state:
+Setting this variable to TRUE will remove all previous runs. Use only to start from a clean state:
 #### Required software: 
 - NA
 #### Other Variables:
