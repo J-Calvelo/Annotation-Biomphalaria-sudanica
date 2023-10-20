@@ -171,7 +171,7 @@ Setting this variable to TRUE will assign GO terms to the predicted proteins usi
 #### Other Variables:
 - eggnog_data: Full path to the folder with eggnog-mapper reference data
 
-# 16) RUN_TRNA
+### 16) RUN_TRNA
 Setting this variable to TRUE will identify tRNA loci in the genome
 #### Required software:
 - tRNAscan-SE (https://github.com/UCSC-LoweLab/tRNAscan-SE)
@@ -193,23 +193,42 @@ Setting this variable to TRUE will identify signal peptides and mitochondrial ta
 #### Other Variables:
 - targetp_file. Full path to the TargetP installation folder 
 
-19) SEARCH_SIGNALS
+### 19) SEARCH_SECRETOMEP
+Setting this variable to TRUE will search for additional secreted proteins using SecretomeP
+#### Required software:
+- seqkit (https://github.com/shenwei356/seqkit)
+- secretomeP (https://services.healthtech.dtu.dk/cgi-bin/sw_request?software=secretomep&version=1.0&packageversion=1.0h&platform=Linux)
+ #### Other Variables:
+- secretomep: full path for the secretomep folder instalation. 
 
-SEARCH_SIGNALS=FALSE
-SEARCH_SECRETOMEP=FALSE # 1st Excludes Signalp and TargetP results. Then runs SecretomeP
-SIGNAL_RELOCATION_TABLE=FALSE # SecretomeP is an asshole!! this part makes sense of the output (Re-formats a table and undoes an ID change)
+### 20) SIGNAL_RELOCATION_TABLE
+Setting this variable to TRUE will reformat SecretomeP output in line with the rest of the pipeline
+#### Required software:
+- NA
+#### Other Variables:
+- NA
 
-# 18) Run DeepTMHMM
-DeepTMHMM=FALSE
-TABLE_TMHMM=FALSE
+### 21) Run DeepTMHMM
+Setting this variable to TRUE will run DeepTMHMM and identify transmembrane domains on the predicted proteins.
+#### Required software:
+- DeepTMHMM (https://dtu.biolib.com/DeepTMHMM)
+#### Other Variables:
+- NA
 
-# 19) FREP Search # Serches FREP genes for BLAST and domain structure, and while it checks if there are some weird chimera like gene we should know about. Requires the basic conda environment
-SAM_IGSF_SEARCH=FALSE
-SEARCH_FREPS=FALSE
-FREP_PHYLOGENY=FALSE
-SUP_TAB_PAPER_FREP=TRUE
+### 22) TABLE_TMHMM
+Setting this variable to TRUE will reformat DeepTMHMM results, combine them with SEARCH_SIGNALS and SEARCH_SECRETOMEP and do a tentative clasification on the protein based on the presense/absence of signal peptides and transmembrane results.
+#### Required software:
+- DeepTMHMM (https://dtu.biolib.com/DeepTMHMM)
+#### Other Variables:
+- NA
 
-exclude_seq_manual=/home/amanda/PROYECTS/Project_Bsudanica/Bsudanica_Runs/Final_Genome_Annotation/FREP_like_Search/Best_Candidates_ReviewNeded/Manual_check_Missidentifications.txt # File with FREP and CREP candidates to be excluded because of anomalies in the predicted
+### 23) SAM_IGSF_SEARCH
+Setting this variable to TRUE will identify IgSF domains based on custom hmmer profiles. 
+#### Required software:
+- seqkit (https://github.com/shenwei356/seqkit)
+- hmmer (https://github.com/EddyRivasLab/hmmer/tree/master)
+#### Other Variables:
+- igsf_hmmer_profile: Full path to a file with custom IgsF domains (IgSF1 and IgSF2). Originally designed in:  https://doi.org/10.1371/journal.pntd.0008780
 
 # 20) Mini_Orthofinder (Orthofinder but just with a couple of species) # requires the conda environment: conda activate Orthofinder
 PREPARE_MINI_ORTHOFINDER=FALSE
@@ -217,6 +236,39 @@ MINI_ORTHOFINDER=FALSE
 MINI_ORTHOFINDER_EGGNOG=FALSE # Requires conca activate Eggnog
 MINI_ORTHOFINDER_EGGNOG_FOR_PHO=FALSE
 MINI_ORTHOFINDER_INTERPROT=FALSE # Requires conca activate Interprot
+
+
+
+### 24) SEARCH_CREP_FREP_GREP
+Setting this variable to TRUE will identify candidates members of the CREP, FREP, GREP and other related proteins based on the absence or presence of protein domains. And BLAST hits to known members these protein families.
+#### Required software:
+- seqkit (https://github.com/shenwei356/seqkit)
+- BLAST+ (http://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs)
+#### Other Variables: 
+- Fibrinogen_signatures: List separated by white spaces of interpro signatures associated with FBD domains
+- C_lectin_signatures: List separated by white spaces of interpro signatures associated with c-lectin domains
+- Galectin_signatures: List separated by white spaces of interpro signatures associated with galectin domains
+- EGF_signatures_signatures: List separated by white spaces of interpro signatures associated with EGF domains
+- Inmunoglobulin_signatures: List separated by white spaces of interpro signatures associated with Inmunoglobulin domains
+- Dheilly_CREP_prott: Fasta file with reference CREP sequences taken from (doi: 10.1016/j.dci.2014.10.009)
+- Dheilly_GREP_prott: Fasta file with reference GREP sequences taken from (doi: 10.1016/j.dci.2014.10.009)
+- Dheilly_FREP_prott: Fasta file with reference FREP sequences taken from (doi: 10.1016/j.dci.2014.10.009)
+- Lu_FREP_prot: Fasta file with reference FREP sequences taken from  (https://doi.org/10.1371/journal.pntd.0008780)
+
+Note1: See main manuscript for the full description of the selecction procedure. Some of the sources of evidence were carried out as diagnostics.
+Note2: The initial classification was then revised manually in a case by case.
+
+### 25) CREP_FREP_PHYLOGENY
+Setting this variable to TRUE will align CREP and FREP sequences, trim them automatically and callculate their phylogenetic relationships with iqtree
+#### Required software:
+- seqkit (https://github.com/shenwei356/seqkit)
+- Trimal (https://github.com/inab/trimal)
+
+
+SUP_TAB_PAPER_FREP=TRUE
+
+exclude_seq_manual=/home/amanda/PROYECTS/Project_Bsudanica/Bsudanica_Runs/Final_Genome_Annotation/FREP_like_Search/Best_Candidates_ReviewNeded/Manual_check_Missidentifications.txt # File with FREP and CREP candidates to be excluded because of anomalies in the predicted
+
 
 # 21) Protein expansion: CAFE  # requires the basic conda environment: conda activate
 MINI_CAFE_EXPANSION_PREPARE=FALSE # Re-Pharses Orthofinder's results
