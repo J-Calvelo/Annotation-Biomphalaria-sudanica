@@ -330,23 +330,38 @@ Setting this variable to TRUE will prepare input files for the Go term enrichmen
 #### Other Variables:
 - orthofinder_folder: Full path of the folder where the Orthofinder is going to be run
 
-### 33) DATA_CROSS_INTERPROT_SIGNALP
-Setting this variable to TRUE will combine the secretion, mitochodrial signal petides and transmembrane tables with InterproScan Results
+### 33) DATA_CROSS_POLYA_REPEATS
+Setting this variable to TRUE will identify genes that overlap with repeated elements
 #### Required software:
 - NA
 #### Other Variables:
 - NA
 
-### 33) DATA_CROSS_INTERPROT_SIGNALP
+### 34) SUMMARY
+Setting this variable to TRUE will copy and move some result files for easier access
+#### Required software:
+- NA
+#### Other Variables:
+- NA
 
+### 35) LOCATION_TABLE
+Setting this variable to TRUE will compine the results of SignalP, TargetP, SecretomeP DeepTMHMM and InterproScan in a single table
+#### Required software:
+- NA
+#### Other Variables:
+- NA
 
+### 36) GFF
+Setting this variable to TRUE will combine the resulting GFFs of Stringtie, Transdecoder, barrnap and tRNAscan-SE in a single GFF file. Also adding the InterproScan annotation to each gene.
+#### Required software:
+- seqkit (https://github.com/shenwei356/seqkit)
+#### Other Variables:
+- NA
 
-DATA_CROSS_POLYA_REPEATS=FALSE
-
-# 23) Final Summary # Requires the basic conda environment: conda activate
-FINAL_SUMMARY=FALSE
-FINAL_Generate_GO_Lists=FALSE
-FINAL_LOCATION_TABLE=FALSE
-FINAL_GFF=FALSE
-FINAL_GFF_SORT=FALSE
-
+### 37) GFF_SORT
+Setting this variable to TRUE will sort the resulting combined GFF. 
+#### Required software:
+- seqkit (https://github.com/shenwei356/seqkit)
+#### Other Variables:
+- NA
+Note: It is slower than gffread and hardcodded to work with this pipeline of analysis, but it preserves the UTR predictions.
