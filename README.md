@@ -1,6 +1,7 @@
 # Annotation-Biomphalaria-sudanica
 Bioinformatic pipline utiliced in XXXXXX for the annotation of Biomphalaria sudanica.
 
+## Publication_Bsudanica_annotation.sh
 The script is subdevided into several blocks of analysis and/or file preparation in order to facilitate re-runs. Which blocks are ran at a time can be controlled by setting to true variables located from lines 12 to 120 (all written in all caps). Other important variables for the run are located betwee lines 123 to 200. Some will be discussed now while others more specific will be mentioned as they become relevant:
 
 ### General variables:
@@ -249,21 +250,7 @@ Setting this variable to TRUE will run Orthofinder with default parameters
 #### Other Variables:
 - orthofinder_folder: Full path of the folder where the Orthofinder is going to be run
 
-### 26) ORTHOFINDER_EGGNOG
-Setting this variable to TRUE will assign GO terms to the predicted proteins using eggnog mapper for all sequences analysed by Orthofinder
-#### Required software:
-- eggnog-mapper (https://github.com/eggnogdb/eggnog-mapper/tree/master)
-#### Other Variables:
-- orthofinder_folder: Full path of the folder where the Orthofinder is going to be run
-
-### 27) ORTHOFINDER_EGGNOG_FOR_HOG
-Setting this variable to TRUE will asign GO terms to each HOG identified by orthofinder, assuming that GO terms asigned to one of it's members applies to the whole group.
-#### Required software:
-- NA
-#### Other Variables:
-- orthofinder_folder: Full path of the folder where the Orthofinder is going to be run
-
-### 28) SEARCH_CREP_FREP_GREP
+### 26) SEARCH_CREP_FREP_GREP
 Setting this variable to TRUE will identify candidates members of the CREP, FREP, GREP and other related proteins based on the absence or presence of protein domains. And BLAST hits to known members these protein families.
 #### Required software:
 - seqkit (https://github.com/shenwei356/seqkit)
@@ -282,7 +269,7 @@ Setting this variable to TRUE will identify candidates members of the CREP, FREP
 Note1: See main manuscript for the full description of the selecction procedure. Some of the sources of evidence were carried out as diagnostics.
 Note2: The initial classification was then revised manually in a case by case.
 
-### 29) CREP_FREP_PHYLOGENY
+### 27) CREP_FREP_PHYLOGENY
 Setting this variable to TRUE will align CREP and FREP sequences, trim them automatically and callculate their phylogenetic relationships with iqtree. All sequences identified as Full will be included, with the exclusion of ones specified on a file (exclude_seq_manual)
 #### Required software:
 - seqkit (https://github.com/shenwei356/seqkit)
@@ -291,14 +278,14 @@ Setting this variable to TRUE will align CREP and FREP sequences, trim them auto
 #### Other Variables: 
 - exclude_seq_manual: Full path to a file with protein ids manually removed.
 
-### 30) SUP_TAB_PAPER_CREP_FREP_GREP
+### 28) SUP_TAB_PAPER_CREP_FREP_GREP
 Setting this variable to TRUE will summirize the results in a table 
 #### Required software:
 - NA
 #### Other Variables: 
 - NA
 
-# 31) MINI_CAFE_EXPANSION_PREPARE
+### 29) MINI_CAFE_EXPANSION_PREPARE
 Setting this variable to TRUE will generate all input files for CAFE, from Orthofinder's results
 #### Required software:
 - make_ultrametric.py (one of orthofinde's utility scripts https://github.com/davidemms/OrthoFinder)
@@ -307,20 +294,31 @@ Setting this variable to TRUE will generate all input files for CAFE, from Ortho
 - mini_ortho_min_Nspe: Minimun number of genes in the HOG to be considered.
 - ultrametic_tree_root_age: Age of the tree's root in Million years
  
-# 32) MINI_CAFE_EXPANSION_TEST_RUNS
+### 30) MINI_CAFE_EXPANSION_TEST_RUNS
 Setting this variable to TRUE will conduct test runs for CAFE within a range of parameters and repetitions, or until one of them fails to compute.
 #### Required software:
 - cafe5 (https://github.com/hahnlab/CAFE5)
 #### Other Variables: 
-end_kvalue: maximun number of K to test
-max_cafe_runs_perK: Maximun number of repetitions per K to conduct
-max_number_iterations: Makimun number of itterations done by CAFE
+- orthofinder_folder: Full path of the folder where the Orthofinder is going to be run
+- end_kvalue: maximun number of K to test
+- max_cafe_runs_perK: Maximun number of repetitions per K to conduct
+- max_number_iterations: Makimun number of itterations done by CAFE5
 
-# 21) Protein expansion: CAFE  # requires the basic conda environment: conda activate
-MINI_CAFE_EXPANSION_TEST_RUNS=FALSE # Runs CAFE test runs for manual analysis
-MINI_CAFE_EXPANSION_DEF_RUN=FALSE # Just runs the definitive run and summariced what families expanded or contracted
-MINI_CAFE_EXPANSION_ANOT_INTERPROT=FALSE # Runs interpro for all non-Bsudanica species and store the results # requires conda interprot
-MINI_CAFE_EXPANSION_ANOT_EGGNOG=FALSE # Runs Eggnog for all non-Bsudanica species and store the results # requires conda eggnog
+### 31) MINI_CAFE_EXPANSION_DEF_RUN
+Setting this variable to TRUE will conduct one final run of CAFE5 that will be taken as definitive.
+#### Required software:
+- cafe5 (https://github.com/hahnlab/CAFE5)
+- seqkit (https://github.com/shenwei356/seqkit)
+#### Other Variables: 
+- orthofinder_folder: Full path of the folder where the Orthofinder is going to be run
+- max_number_iterations: Makimun number of itterations done by CAFE5
+- Def_Kvalue: The best K-value identified in the test runs
+- interest_nodes_file: Full path to a file with the node names separated by tabs: "Biomphalaria_glabrata_IM_GCA_025434175.1        <0>"
+
+MINI_CAFE_EXPANSION_ANOT_EGGNOG
+
+
+
 MINI_CAFE_EXPANSION_ANOT_PREPARE_GO=FALSE
 
 # 22) Data crossings
