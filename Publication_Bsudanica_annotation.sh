@@ -1,213 +1,116 @@
 #!/usr/bin/env bash
 
-# This script conducts all analysis up to the genome annotation.
-# The work can be controlled by setting the following variables to true or false
-# some special notes are included for some steps
-
-# Note: before adapting this script to run on a different computer it is needed to
-# change all the "conda" lines at the start of each module.
-
+################################################################################
+################################################################################
+################################################################################
 # Run tasks!!
-# 1) Delete all evidence
-CLEAN_RUN=FALSE # Think twice. This removes everything and is meant to start over.
-
-# 2) Reapeat annotation
-TEA_EARLGREY_HOT=FALSE # Requires the conda enviroment earlGrey active: conda activate earlGrey. And the following additions to the PATH: PATH=$PATH:/home/amanda/programas/RECON-1.08/bin:/home/amanda/programas/rmblast-2.11.0/bin:/home/amanda/programas/RepeatScout-1.0.6:/home/amanda/programas/RepeatMasker:/home/amanda/programas/RepeatMasker/util:/home/amanda/programas/ucscTwoBitTools:/home/amanda/programas/RepeatModeler-2.0.2a:/home/amanda/programas/EarlGrey
-  TEA_EARLGREY_SUMMARY=FALSE # my Summary for the repeats
-
-# 3) Pacbio Cleaning
-CLEAN_PACBIO_READS=FALSE # Requires the conda environment TAMA: conda activate TAMA
-  CLEAN_PACBIO_READS_RM_TM=FALSE # Remove intermediary files
-
-# 4) Illumina Reads Cleaning # Requires the conda environment Mixed_Transcriptome: conda activate Mixed_Transcriptome
+CLEAN_RUN=FALSE
+TEA_EARLGREY_HOT=FALSE
+TEA_EARLGREY_SUMMARY=FALSE
+CLEAN_PACBIO_READS=FALSE
+CLEAN_PACBIO_READS_RM_TM=FALSE
 CLEAN_ILLUMINA_READS=FALSE
-
-# 5) PACbio Mappings # Requires the conda environment TAMA: conda activate TAMA
 PACBIO_MAP=FALSE
-
-# 6) STAR Mappings # Requires the conda environment Mixed_Transcriptome: conda activate Mixed_Transcriptome
 STAR_MAP=FALSE
-
-# 7) Stringtie Annotation # Requires the conda environment Mixed_Transcriptome: conda activate Mixed_Transcriptome
 STRINGTIE_TRANS=FALSE
-
-# 8) Busco evaluation # Requires the conda environment Busco: conda activate Busco
-BUSCO_TESTS=FALSE
-  BUSCO_GENOME=FALSE # Runs the busco for the entire genome
-  BUSCO_RNA=FALSE # Runs the busco for the transcriptome
-  BUSCO_PROT_ALL=FALSE # Runs the busco for the predicted proteins
-
-# 9) Find Mitochondria # Requires the basic conda environment: conda activate
 FIND_MITOCHONDRIA=FALSE
-  FIND_MITOCHONDRIA_RM_TM=FALSE # Removes the blast reference
-
-# 10) Map reads to Mitochondria PACBIO # Requires the conda environment TAMA: conda activate TAMA
+FIND_MITOCHONDRIA_RM_TM=FALSE
 MAP_MITOCHONDRIA_PACBIO=FALSE
-MAP_MITOCHONDRIA_PACBIO_NEW_ORIGIN=FALSE # Confirm that the change in the origin didn't affected the read mapping counts
-
-# 11) Map reads to Mitochondria ILLUMINA #  Requires the basic conda environment: conda activate
+MAP_MITOCHONDRIA_PACBIO_NEW_ORIGIN=FALSE
 MAP_MITOCHONDRIA_ILLUMINA=FALSE
-MAP_MITOCHONDRIA_ILLUMINA_NEW_ORIGIN=FALSE # Confirm that the change in the origin didn't affected the read mapping counts
-
-# 12) Get ORFs  #  Requires the basic conda environment: conda activate
-ORF_PROT_SEQ_1=FALSE # runs the necessary predictions and tests
-ORF_PROT_SEQ_2=FALSE # Predicts the Proteins
-
-# 16) Interprot # Requires the conda environment: conda activate Interprot
+MAP_MITOCHONDRIA_ILLUMINA_NEW_ORIGIN=FALSE
+ORF_PROT_SEQ_1=FALSE
+ORF_PROT_SEQ_2=FALSE
+BUSCO_TESTS=FALSE
+BUSCO_GENOME=FALSE
+BUSCO_RNA=FALSE
+BUSCO_PROT_ALL=FALSE
 RUN_INTERPROT=FALSE
-
-# 17) Orthofinder # requires the conda environment: conda activate Orthofinder
-PREPARE_ORTHOFINDER=FALSE
-RUN_ORTHOFINDER=FALSE
-
-# 18) GO Terms with Eggnog # requires the conda environment: conda activate Eggnog
 RUN_EGGNOG=FALSE
-
-# 19) non coding search # Requires conda environment: conda activate RNA_NonCoding
 RUN_TRNA=FALSE
 RUN_RIBOSOME=FALSE
-
-# 21) SignalP, TargetP  # Requires conda activate Signal
 SEARCH_SIGNALS=FALSE
-SEARCH_SECRETOMEP=FALSE # 1st Excludes Signalp and TargetP results. Then runs SecretomeP
-SIGNAL_RELOCATION_TABLE=FALSE # SecretomeP is an asshole!! this part makes sense of the output (Re-formats a table and undoes an ID change)
-
-# 22) Run DeepTMHMM
+SEARCH_SECRETOMEP=FALSE
 DeepTMHMM=FALSE
 TABLE_TMHMM=FALSE
-
-# 23) FREP Search # Serches FREP genes for BLAST and domain structure, and while it checks if there are some weird chimera like gene we should know about. Requires the basic conda environment
 SAM_IGSF_SEARCH=FALSE
-SEARCH_FREPS=FALSE
-FREP_PHYLOGENY=FALSE
-SUP_TAB_PAPER_FREP=TRUE
-
-exclude_seq_manual=/home/amanda/PROYECTS/Project_Bsudanica/Bsudanica_Runs/Final_Genome_Annotation/FREP_like_Search/Best_Candidates_ReviewNeded/Manual_check_Missidentifications.txt # File with FREP and CREP candidates to be excluded because of anomalies in the predicted
-
-# 24) Mini_Orthofinder (Orthofinder but just with a couple of species) # requires the conda environment: conda activate Orthofinder
-PREPARE_MINI_ORTHOFINDER=FALSE
-MINI_ORTHOFINDER=FALSE
-MINI_ORTHOFINDER_EGGNOG=FALSE # Requires conca activate Eggnog
-MINI_ORTHOFINDER_EGGNOG_FOR_PHO=FALSE
-MINI_ORTHOFINDER_INTERPROT=FALSE # Requires conca activate Interprot
-
-# 25) Protein expansion: CAFE  # requires the basic conda environment: conda activate
-MINI_CAFE_EXPANSION_PREPARE=FALSE # Re-Pharses Orthofinder's results
-MINI_CAFE_EXPANSION_TEST_RUNS=FALSE # Runs CAFE test runs for manual analysis
-MINI_CAFE_EXPANSION_DEF_RUN=FALSE # Just runs the definitive run and summariced what families expanded or contracted
-MINI_CAFE_EXPANSION_ANOT_INTERPROT=FALSE # Runs interpro for all non-Bsudanica species and store the results # requires conda interprot
-MINI_CAFE_EXPANSION_ANOT_EGGNOG=FALSE # Runs Eggnog for all non-Bsudanica species and store the results # requires conda eggnog
-MINI_CAFE_EXPANSION_ANOT_PREPARE_GO=FALSE
-
-# Notes for CAFE: Unforunately is not easy to automate CAFE in a way that matters. De first portion generates all th0e necesary input files
-  # The second does many test runs to manually check what parameters to use. Unfortunately it is all "wibbly wobbly". For now I'm using K=2 because it is better than one and a K=4 some runs reported minor issues in some attempts. Probably we should use K=3
-  # Also I'm assuming that Lambda (birth/dead of genes) is constant within all species. It probably holds true for the mini orthofinder test run but it will need to be reviewed latter.
-  # As some extra inconvenient problems: Orthofinder and CAFE number nodes differently and this is more complicated than the basic overview I did before. So the plan is to have a label for aall the nodes in a file before running. Something meaningfull for each node that allows to easilly check what they are
-  # Finnally, to know what was lost in Biomphalaria I need to know what was there. That means running Interprot and Eggnog AGAIN but just for the protein families of interest.
-
-################################################
-
-### Data crossings
-DATA_CROSS_INTERPROT_EGGNOG=FALSE # Registra que genes tienen las entradas de interprot identificadas como parte del sistema inmune
+SEARCH_CREP_FREP_GREP=FALSE
+CREP_FREP_PHYLOGENY=FALSE
+SUP_TAB_PAPER_CREP_FREP_GREP=FALSE
+PREPARE_ORTHOFINDER=FALSE
+ORTHOFINDER=FALSE
+CAFE_EXPANSION_PREPARE=FALSE
+CAFE_EXPANSION_TEST_RUNS=FALSE
+CAFE_EXPANSION_DEF_RUN=FALSE
+CAFE_EXPANSION_ANOT_EGGNOG=FALSE
+CAFE_EXPANSION_ANOT_PREPARE_GO=FALSE
 DATA_CROSS_INTERPROT_SIGNALP=FALSE
 DATA_CROSS_POLYA_REPEATS=FALSE
+SUMMARY=FALSE
+LOCATION_TABLE=FALSE
+GFF=FALSE
+GFF_SORT=FALSE
 
-# X) Final Summary # Requires the basic conda environment: conda activate
-FINAL_SUMMARY=FALSE
-FINAL_Generate_GO_Lists=FALSE
-FINAL_LOCATION_TABLE=FALSE
-FINAL_GFF=FALSE
-FINAL_GFF_SORT=FALSE
+################################################################################
+################################################################################
+################################################################################
 
-# Input data (data from outside this script like genome or reads)
+# General variables
+species_name=Bsudanica
+threads=30
+work_dir=/home/amanda/PROYECTS/Project_Bsudanica/Bsudanica_Runs/Final_Genome_Annotation
 genome_file=/home/amanda/PROYECTS/Project_Bsudanica/Bsudanica_Runs/Genome_Info/Bsud111_ccs_assembly.fasta
 
+# Input data (data from outside this script like genome or reads)
 raw_pacbio_reads=/home/amanda/PROYECTS/Project_Bsudanica/Bsudanica_Runs/PACBIO_Reads/More_Files/ccs_Q20/m64047_210901_223130.ccs.bam
 pacbio_primers=/home/amanda/PROYECTS/Project_Bsudanica/Bsudanica_Runs/PACBIO_Reads/Primer.fasta
-orthofinder_folder=/home/amanda/PROYECTS/Project_Bsudanica/Bsudanica_Runs/Final_Genome_Annotation/Orthofinder_Run
-mini_orthofinder_folder=/home/amanda/PROYECTS/Project_Bsudanica/Bsudanica_Runs/Final_Genome_Annotation/Mini_Orthofinder_Run
+orthofinder_folder=/home/amanda/PROYECTS/Project_Bsudanica/Bsudanica_Runs/Final_Genome_Annotation/Mini_Orthofinder_Run
 other_species_orthofinder=/home/amanda/PROYECTS/Project_Bsudanica/Mini_Orthofinder_cDNA
-# mini_other_species_orthofinder=/home/amanda/PROYECTS/Project_Bsudanica/Mini_Orthofinder_species
-mini_other_species_orthofinder=/home/amanda/PROYECTS/Project_Bsudanica/Mini_Orthofinder_cDNA
-mini_other_species_mitochondria=/home/amanda/PROYECTS/Project_Bsudanica/Mini_Orthofinder_Mitochondrias
-dash_ids=$(echo "Biomphalaria_glabrata_VectorBaseBB02 Biomphalaria_pfeifferi_SamTeam Biomphalaria_straminea_gigascience")
-
+other_species_mitochondria=/home/amanda/PROYECTS/Project_Bsudanica/Mini_Orthofinder_Mitochondrias/All_mito.fasta
+exclude_seq_manual=/home/amanda/PROYECTS/Project_Bsudanica/Bsudanica_Runs/Final_Genome_Annotation/FREP_like_Search/Best_Candidates_ReviewNeded/Manual_check_Missidentifications.txt # File with FREP and CREP candidates to be excluded because of anomalies in the predicted
 raw_illumina_reads_dir=/home/amanda/PROYECTS/Project_Bsudanica/Bsudanica_Runs/Illumina_reads
 raw_illumina_1=_1.fq.gz
 raw_illumina_2=_2.fq.gz
 Illumina_adapters=/home/amanda/miniconda3/pkgs/matic-0.39-hdfd78af_2/share/matic/adapters/TruSeq3-PE-2.fa
-star_index_num=13
-
-repeat_search_term=eumetazoa
-
 mito_genes=/home/amanda/PROYECTS/Project_Bsudanica/Bglabrata_Runs/Genome_Info/Mitochondria_Coding.fa
 mito_gff=/home/amanda/PROYECTS/Project_Bsudanica/Bsudanica_Runs/Mitocondrial_tests/Final_Anotation_Files/Mitocondrial_htseq.gff # custom made annotation for counting
 mito_htseq_illumina_gff=/home/amanda/PROYECTS/Project_Bsudanica/Bsudanica_Runs/Mitocondrial_tests/Final_Anotation_Files/Mitocondrial_htseq_Illumina.gff # custom made annotation for counting
-
 mito_genome=/home/amanda/PROYECTS/Project_Bsudanica/Bsudanica_Runs/Mitocondrial_tests/Mitocondrial_chr.fa
 new_ori_genome=/home/amanda/PROYECTS/Project_Bsudanica/Bsudanica_Runs/Mitocondrial_tests/Final_Anotation_Files/Mitocondrial_New_Origin_chr.fasta
 new_ori_gff=/home/amanda/PROYECTS/Project_Bsudanica/Bsudanica_Runs/Mitocondrial_tests/Final_Anotation_Files/Mitocondrial_Mito_New_Origin_Htseqcount.gff
 new_ori_htseq_illumina_gff=/home/amanda/PROYECTS/Project_Bsudanica/Bsudanica_Runs/Mitocondrial_tests/Final_Anotation_Files/Mitocondrial_Mito_New_Origin_Htseqcount.gff # custom made annotation for counting
-
 uniprot=/home/amanda/PROYECTS/Project_Bsudanica/Uniprot/uniprot_Swiss-Prot.fasta
 pfam=/home/amanda/PROYECTS/Project_Bsudanica/PFAM/Pfam-A.hmm
-interprot_path=/home/amanda/PROYECTS/interproscan-5.56-89.0
-transdecoder_evalue=1e-5
 eggnog_data=/home/amanda/PROYECTS/eggnog_22-7-2022
-interprot_searches=/home/amanda/PROYECTS/Project_Bsudanica/Interprot_Search_terms
-eggnog_interes=/home/amanda/PROYECTS/Project_Bsudanica/Eggnog_Interes.tab
-
-frep_ids=/home/amanda/PROYECTS/Project_Bsudanica/Bglabrata_Runs/Genome_Info/Frep_genes_id.tab
-
 Lu_FREP_prot=/home/amanda/PROYECTS/Project_Bsudanica/References_FREP_CREP_GREP/Lu_etal2020_FREP.fa
-Dehilly_FREP_prot=/home/amanda/PROYECTS/Project_Bsudanica/References_FREP_CREP_GREP/Dehilly_etal_2015_FREP.fa
-Dehilly_CREP_prot=/home/amanda/PROYECTS/Project_Bsudanica/References_FREP_CREP_GREP/Dehilly_etal_2015_CREP.fa
-Dehilly_GREP_prot=/home/amanda/PROYECTS/Project_Bsudanica/References_FREP_CREP_GREP/Dehilly_etal_2015_GREP.fa
+Dheilly_FREP_prot=/home/amanda/PROYECTS/Project_Bsudanica/References_FREP_CREP_GREP/Dehilly_etal_2015_FREP.fa
+Dheilly_CREP_prot=/home/amanda/PROYECTS/Project_Bsudanica/References_FREP_CREP_GREP/Dehilly_etal_2015_CREP.fa
+Dheilly_GREP_prot=/home/amanda/PROYECTS/Project_Bsudanica/References_FREP_CREP_GREP/Dehilly_etal_2015_GREP.fa
+igsf_hmmer_profile=/home/amanda/PROYECTS/Project_Bsudanica/Sam_Team_IgSF/Bg_IgSF.hmm
 
-Fibrinogen_signatures=$(echo "IPR002181 IPR014716 IPR020837 IPR036056")
+# Software installation
+targetp_file=/home/amanda/PROYECTS/Signalp/targetp-2.0/bin
+secretomep=/home/amanda/PROYECTS/secretomep-1.0
+earlgrey_instalation=/home/amanda/programas/EarlGrey
+interprot_path=/home/amanda/PROYECTS/interproscan-5.56-89.0
+
+# Other variables
+dash_ids=$(echo "Biomphalaria_glabrata_VectorBaseBB02 Biomphalaria_pfeifferi_SamTeam Biomphalaria_straminea_gigascience")
+star_index_num=13
+transdecoder_evalue=1e-5
+FBD_signatures=$(echo "IPR002181 IPR014716 IPR020837 IPR036056")
 Inmunoglobulin_signatures=$(echo "IPR003598 IPR003599 IPR007110 IPR013098 IPR013783 IPR036179")
 C_lectin_signatures=$(echo "IPR001304 IPR016186 IPR016187 IPR018378")
 Galectin_signatures=$(echo "IPR001079 IPR015533 IPR044156 IPR000922 IPR043159")
 EGF_signatures=$(echo "IPR000152 IPR000742 IPR001881 IPR002049 IPR013032 IPR013111 IPR018097 IPR024731 IPR026823 IPR041161")
-
-igsf_hmmer_profile=/home/amanda/PROYECTS/Project_Bsudanica/Sam_Team_IgSF/Bg_IgSF.hmm
-interest_genes_custom_analysis=/home/amanda/PROYECTS/Project_Bsudanica/Interest_Genes_for_DnDs.in
-
-blast_ident=50
-
-Lymnaea_stagnalis_data=/home/amanda/PROYECTS/Project_Bsudanica/Lymnaea_stagnalis/Lymnaea_stagnalis_transcriptome_Seppala_et_al_2020.fasta
-
-# Gene family expansions<
+crep_frep_grep_blast_ident=50
 mini_ortho_min_Nspe=3
 end_kvalue=5
 max_cafe_runs_perK=10
 max_number_iterations=10000
-ultrametic_tree_root_age=20 # Taken from Sam's work
+ultrametic_tree_root_age=20
 Def_Kvalue=1
-
-# Fish genes by GO
-fish_go_file=/home/amanda/PROYECTS/Project_Bsudanica/Fish_by_GO.tab
-
-# Other parameters
-species_name=Bsudanica
-earlgrey_instalation=/home/amanda/programas/EarlGrey
-work_dir=/home/amanda/PROYECTS/Project_Bsudanica/Bsudanica_Runs/Final_Genome_Annotation
-threads=30
-
-comp_bglabrata=/home/amanda/PROYECTS/Project_Bsudanica/Bglabrata_Runs/Genome_Info/VectorBase-51_BglabrataBB02_Genome.fasta
 exclude_mitochondria=contig_7934
-targetp_file=/home/amanda/PROYECTS/Signalp/targetp-2.0/bin
-secretomep=/home/amanda/PROYECTS/secretomep-1.0
-hyphy_internal_functions=/home/amanda/programas/hyphy-develop/res
-hyphy_stand_alone=/home/amanda/programas/hyphy-analyses
-ninja_path=/home/amanda/programas/ninja_1.2.2
-max_gap_in_col=0.8
-min_lenght_for_evospeed=600
-
-interest_coting_TomJacob=contig_499
-interest_coting_TomJacob_source_of_evil=JAKZJL010000015.1
-
-i_adhore_instalation=/home/amanda/programas/i-ADHoRe/build/src
 
 kill_fai () {
   if [ -f $genome_file".fai" ]
@@ -573,7 +476,7 @@ then
   echo "Live long. And Prosper" # earlGrey is a Star Trek reference
   echo "Do not stare at the cow"
   rm -r $work_dir"/"$species_name"EarlGrey"
-  $earlgrey_instalation"/earlGrey" -g $genome_file -s $species_name -o $work_dir -r $repeat_search_term -t $threads
+  $earlgrey_instalation"/earlGrey" -g $genome_file -s $species_name -o $work_dir -r eumetazoa -t $threads
 fi
 
 if [ "$TEA_EARLGREY_SUMMARY" == "TRUE" ]
@@ -976,8 +879,6 @@ then
 
   kill_fai
   gffread -W -C -w $work_dir"/TransDecoder/Bsudanica_annotation_mapped_prot.fasta" -g $genome_file $work_dir"/TransDecoder/Bsudanica_annotation_polyA.gff3"
-  gffread -W -C -w Test_1.fasta -g Bsud111_ccs_assembly.fasta Bsudanica_annotation_polyA.gff3
-
 fi
 
 ################################################################################
@@ -1068,128 +969,6 @@ fi
 ################################################################################
 ################################################################################
 
-if [ "$DATA_CROSS_INTERPROT_EGGNOG" == "TRUE" ]
-then
-  add_jump_line=$(echo "CATHGENE3D CDD INTERPRO PANTHER PFAM PIRSF PRINTS PROFILE PROSITE SFLD SMART SSF TIGRFAMs")
-
-  rm -r $work_dir"/Data_Crossroads"
-  mkdir $work_dir"/Data_Crossroads"
-  mkdir $work_dir"/Data_Crossroads/Temp"
-
-  term_searches_files=$(ls $interprot_searches | sed "s/.tsv$//")
-  for search_fi in $term_searches_files
-  do
-    original_search=$(echo $search_fi | sed "s/SearchResults-//" | tr "_" " ")
-    grep . $interprot_searches"/"$search_fi".tsv" | grep -v -P "Accession\tName\tDescription" >> $work_dir"/Data_Crossroads/Temp/"$search_fi".temp"
-
-    for jump in $add_jump_line
-    do
-      sed -i "s/$jump$/&_ooo_/" $work_dir"/Data_Crossroads/Temp/"$search_fi".temp"
-    done
-    cat $work_dir"/Data_Crossroads/Temp/"$search_fi".temp" | tr "\n" " " >> $work_dir"/Data_Crossroads/Temp/"$search_fi".temp2"
-    sed -i "s/_ooo_/\n/g" $work_dir"/Data_Crossroads/Temp/"$search_fi".temp2"
-    rm $work_dir"/Data_Crossroads/Temp/"$search_fi".temp"
-    grep INTERPRO$ $work_dir"/Data_Crossroads/Temp/"$search_fi".temp2" | grep -i "$original_search" | awk -F "\t" '{print $1}' >> $work_dir"/Data_Crossroads/Temp/Interprot.temp"
-  done
-
-  sort -u $work_dir"/Data_Crossroads/Temp/Interprot.temp" | tr -d " " >> $work_dir"/Data_Crossroads/Interest_Interprot.txt"
-  echo "Done in files"
-
-  # Selected Genes
-  grep -w -F -f $work_dir"/Data_Crossroads/Interest_Interprot.txt" $work_dir"/Interprot_Results/Results.tsv" | awk -F "\t" '{print $1}' >> $work_dir"/Data_Crossroads/Temp/Interprot_genes.tmp"
-  grep -w -F -f $eggnog_interes $work_dir"/Eggnog/Eggnog.emapper.go" | awk -F "\t" '{print $1}' >> $work_dir"/Data_Crossroads/Temp/Eggnog_genes.tmp"
-
-  echo "Prot_ID Eggnog_Hit Interprot_Hit Interprot_Term Int_Description Interest_Term Hit_Num Original_Search_Term" | tr " " "\t" >> $work_dir"/Data_Crossroads/Interprot_Eggnog_Immune.tab"
-
-  all_genes=$(cat $work_dir"/Data_Crossroads/Temp/"*"_genes.tmp" | sort -u)
-  for gen in $all_genes
-  do
-    echo $gen" Running"
-    check_eggnog=$(grep -w -c -F $gen $work_dir"/Data_Crossroads/Temp/Eggnog_genes.tmp")
-    if [ $check_eggnog -gt 0 ]
-    then
-      Eggnog_hit=$(echo "X")
-    else
-      Eggnog_hit=$(echo ".")
-    fi
-
-    check_interprot=$(grep -w -c -F $gen $work_dir"/Data_Crossroads/Temp/Interprot_genes.tmp")
-    if [ $check_interprot -gt 0 ]
-    then
-      Interprot_hit=$(echo "X")
-      N_Interprot=$(grep -w -F $gen $work_dir"/Data_Crossroads/Interest_Interprot.txt" $work_dir"/Interprot_Results/Results.tsv" | awk -F "\t" '{print $12}' | sort -u | grep -c IPR)
-      gen_interprot=$(grep -w -F $gen $work_dir"/Data_Crossroads/Interest_Interprot.txt" $work_dir"/Interprot_Results/Results.tsv" | awk -F "\t" '{print $12}' | grep IPR | sort -u)
-
-      extract=1
-      for Interprot_term in $gen_interprot
-      do
-        check_selected=$(grep -w -F -c $Interprot_term $work_dir"/Data_Crossroads/Interest_Interprot.txt" | awk -F "\t" '{if ($1>0) print "X"; else print "."}')
-        if [ $check_selected == "X" ]
-        then
-          original_search_terms=$(grep -w -F -c $Interprot_term $work_dir"/Data_Crossroads/Temp/SearchResults"*".temp2" | awk -F ":" '{if ($2>0) print $1}' | sed "s/.*\///" | sed "s/SearchResults-//"  | sed "s/.temp2//" | tr "\n" ";" | sed "s/;$//")
-        else
-          original_search_terms=Indirect_Find
-        fi
-        echo $Interprot_term" "$original_search_terms
-        interprot_data=$(grep -w -F $gen $work_dir"/Interprot_Results/Results.tsv" | grep -w -F $Interprot_term | awk -F "\t" '{print $13}' | sort -u)
-
-        echo $gen"_ooo_"$Eggnog_hit"_ooo_"$Interprot_hit"_ooo_"$Interprot_term"_ooo_"$interprot_data"_ooo_"$check_selected"_ooo_"$extract"_of_"$N_Interprot"_ooo_"$original_search_terms  | sed "s/_ooo_/\t/g" >> $work_dir"/Data_Crossroads/Interprot_Eggnog_Immune.tab"
-        extract=$(($extract + 1))
-      done
-    else
-      echo $gen" "$Eggnog_hit" . NA NA NA NA NA" | tr " " "\t" >> $work_dir"/Data_Crossroads/Interprot_Eggnog_Immune.tab"
-    fi
-  done
-fi
-
-################################################################################
-################################################################################
-################################################################################
-
-if [ "$PREPARE_ORTHOFINDER" == "TRUE" ]
-then
-  rm -r $orthofinder_folder
-  mkdir $orthofinder_folder
-  mkdir $orthofinder_folder"/Temp_Lymnaea_stagnalis"
-  mkdir $orthofinder_folder"/Temp_Lymnaea_stagnalis/LongOrfs"
-  mkdir $orthofinder_folder"/Temp_Lymnaea_stagnalis/Predicts"
-
-  cp $other_species_orthofinder"/"*".pep" $orthofinder_folder
-  seqkit fx2tab -n -i -l $work_dir"/TransDecoder/Predict/PolyA_Transcripts_work.fasta.transdecoder.pep" >> $orthofinder_folder"/lenght.temp"
-  extract_peps=$(awk -F "\t" '{print $1}' $orthofinder_folder"/lenght.temp" | awk -F "." '{print $1"."$2}' | sort -u)
-
-  for ext in $extract_peps
-  do
-    echo $ext
-    take=$(grep -w $ext $orthofinder_folder"/lenght.temp" | sort -n -k 2 | tail -n 1 | awk -F "\t" '{print $1}')
-    seqkit grep -j $threads -p $take $work_dir"/TransDecoder/Predict/PolyA_Transcripts_work.fasta.transdecoder.pep" | seqkit seq -i | sed "s/\*$//" >> $orthofinder_folder"/Biomphalaria_sudanica.pep"
-  done
-
-  # Getting Lymnaea_stagnalis prots
-  TransDecoder.LongOrfs -m 50 -S -t $Lymnaea_stagnalis_data -O $orthofinder_folder"/Temp_Lymnaea_stagnalis/LongOrfs"
-  blastp -query $orthofinder_folder"/Temp_Lymnaea_stagnalis/LongOrfs/longest_orfs.pep" -db $work_dir"/TransDecoder/BLASTP_Ref/Uniprot_ref" -max_target_seqs 1 -outfmt 6 -evalue $transdecoder_evalue -num_threads $threads > $orthofinder_folder"/Temp_Lymnaea_stagnalis/Others/blastp.outfmt6"
-  hmmscan --cpu $threads --domtblout $orthofinder_folder"/Temp_Lymnaea_stagnalis/Others/pfam.domtblout" $pfam $work_dir"/TransDecoder/LongOrfs/longest_orfs.pep"
-  TransDecoder.Predict --single_best_only -t $Lymnaea_stagnalis_data --retain_pfam_hits $orthofinder_folder"/Temp_Lymnaea_stagnalis/Others/pfam.domtblout" --retain_blastp_hits $orthofinder_folder"/Temp_Lymnaea_stagnalis/Others/blastp.outfmt6" -O $orthofinder_folder"/Temp_Lymnaea_stagnalis/LongOrfs"
-
-  rm pipeliner.*
-  mv PolyA_Transcripts_work* $orthofinder_folder"/Temp_Lymnaea_stagnalis/Predicts"
-
-  rm $orthofinder_folder"/lenght.temp"
-fi
-
-################################################################################
-################################################################################
-################################################################################
-
-if [ "$RUN_ORTHOFINDER" == "TRUE" ]
-then
-  orthofinder -f $orthofinder_folder -t $threads -a $threads
-fi
-
-################################################################################
-################################################################################
-################################################################################
-
 if [ "$SEARCH_SIGNALS" == "TRUE" ]
 then
   rm -r $work_dir"/Location_Signals"
@@ -1237,61 +1016,6 @@ then
 
   rm $work_dir"/Location_Signals/SECRETOMEP/temp.txt" $work_dir"/Location_Signals/SECRETOMEP/temp2.txt"
 fi
-################################################################################
-################################################################################
-################################################################################
-
-if [ "$SIGNAL_RELOCATION_TABLE" == "TRUE" ]
-then
-  rm -r $work_dir"/Location_Signals/SECRETOMEP/Final"
-  mkdir $work_dir"/Location_Signals/SECRETOMEP/Final"
-  rm $work_dir"/Location_Signals/SecretomeP_results.txt"
-
-  # Extracting fucking table and warning messages
-  all_output_lines=$(grep -c . $work_dir"/Location_Signals/SECRETOMEP/Secretome.out")
-  echo "ProtID NN-score Odds Weighted_by_prior Warnings" | tr " " "\t" >> $work_dir"/Location_Signals/SECRETOMEP/Final/SecretomeP_work_output.tab"
-  grep -A $all_output_lines "NN-score" $work_dir"/Location_Signals/SECRETOMEP/Secretome.out" | tr -d " "  | grep -v "#" >> $work_dir"/Location_Signals/SECRETOMEP/Final/SecretomeP_work_output.tab"
-  grep "seq2seq" $work_dir"/Location_Signals/SECRETOMEP/Secretome.out" >> $work_dir"/Location_Signals/SECRETOMEP/Final/SecretomeP_Warnings.txt"
-
-  count=1
-  stop=$(grep -c . $work_dir"/Location_Signals/SECRETOMEP/Convertion.id")
-
-  while [ $count -le $stop ]
-  do
-    echo $count" of "$stop
-    original=$(sed -n $count"p" $work_dir"/Location_Signals/SECRETOMEP/Convertion.id" | awk -F "\t" '{print $1}')
-    replace=$(sed -n $count"p" $work_dir"/Location_Signals/SECRETOMEP/Convertion.id" | awk -F "\t" '{print $2}')
-
-    echo $original" for "$replace
-    sed -i "s/$original\t/$replace\t/" $work_dir"/Location_Signals/SECRETOMEP/Final/SecretomeP_work_output.tab"
-    sed -i "s/$original\"/$replace\"/" $work_dir"/Location_Signals/SECRETOMEP/Final/SecretomeP_Warnings.txt"
-    count=$(($count + 1))
-  done
-  awk -F "\t" '{if ($2>=0.95) print}' $work_dir"/Location_Signals/SECRETOMEP/Final/SecretomeP_work_output.tab" >> $work_dir"/Location_Signals/SecretomeP_results.txt"
-
-  echo "ID;Prediction;OTHER;SP(Sec/SPI);CS Position" | tr ";" "\t" > $work_dir"/Location_Signals/SignalP_results.txt"
-  grep -v "#" $work_dir"/Location_Signals/SignalP6/prediction_results.txt" | awk -F "\t" '{if ($2!="OTHER") print}' | awk -F "\t" '{if ($4>=0.95) print}' >> $work_dir"/Location_Signals/SignalP_results.txt"
-
-  echo "ID;Prediction;noTP;SP;mTP;CS Position" | tr ";" "\t" > $work_dir"/Location_Signals/Mitocondria_results.txt"
-  awk -F "\t" '{if ($2=="mTP") print}' $work_dir"/Location_Signals/TargetP/Results_summary.targetp2" | awk -F "\t" '{if ($5>=0.95) print}' >> $work_dir"/Location_Signals/Mitocondria_results.txt"
-fi
-
-################################################################################
-################################################################################
-################################################################################
-
-if [ "$SAM_IGSF_SEARCH" == "TRUE" ]
-then
-  rm -r $work_dir"/IGsF_Domain_Search"
-  mkdir $work_dir"/IGsF_Domain_Search"
-  seqkit seq -i $work_dir"/TransDecoder/Predict/PolyA_Transcripts_work.fasta.transdecoder.pep" >> $work_dir"/IGsF_Domain_Search/Work.aa"
-  hmmsearch -E 1e-10 --cpu $threads -o $work_dir"/IGsF_Domain_Search/General_Output.txt" --domtblout $work_dir"/IGsF_Domain_Search/Per_Domain_Table.tab" $igsf_hmmer_profile $work_dir"/IGsF_Domain_Search/Work.aa"
-
-  echo "Prot_ID Prot_Accession Prot_len DomainID Prot_Accession Domain_Len Full_Seq_Evalue Full_Seq_Score Full_Seq_Bias N_Domain Total_Domains cEvalue i-Evalue Domain_Score Domain_Bias Hmm_Start Hmm_End Ali_Start Ali_End Env_Start Env_End acc Target_Description" | tr " " "\t" >> $work_dir"/IGsF_Domain_Search/Per_Domain_Table_work.tab"
-  grep -v "#" $work_dir"/IGsF_Domain_Search/Per_Domain_Table.tab" | tr -s ' ' | tr " " "\t" >> $work_dir"/IGsF_Domain_Search/Per_Domain_Table_work.tab"
-  rm $work_dir"/IGsF_Domain_Search/Work.aa"
-fi
-
 ################################################################################
 ################################################################################
 ################################################################################
@@ -1380,10 +1104,27 @@ fi
 ################################################################################
 ################################################################################
 
-
-if [ "$SEARCH_FREPS" == "TRUE" ]
+if [ "$SAM_IGSF_SEARCH" == "TRUE" ]
 then
-  explore_orthofinder=$mini_orthofinder_folder
+  rm -r $work_dir"/IGsF_Domain_Search"
+  mkdir $work_dir"/IGsF_Domain_Search"
+  seqkit seq -i $work_dir"/TransDecoder/Predict/PolyA_Transcripts_work.fasta.transdecoder.pep" >> $work_dir"/IGsF_Domain_Search/Work.aa"
+  hmmsearch -E 1e-10 --cpu $threads -o $work_dir"/IGsF_Domain_Search/General_Output.txt" --domtblout $work_dir"/IGsF_Domain_Search/Per_Domain_Table.tab" $igsf_hmmer_profile $work_dir"/IGsF_Domain_Search/Work.aa"
+
+  echo "Prot_ID Prot_Accession Prot_len DomainID Prot_Accession Domain_Len Full_Seq_Evalue Full_Seq_Score Full_Seq_Bias N_Domain Total_Domains cEvalue i-Evalue Domain_Score Domain_Bias Hmm_Start Hmm_End Ali_Start Ali_End Env_Start Env_End acc Target_Description" | tr " " "\t" >> $work_dir"/IGsF_Domain_Search/Per_Domain_Table_work.tab"
+  grep -v "#" $work_dir"/IGsF_Domain_Search/Per_Domain_Table.tab" | tr -s ' ' | tr " " "\t" >> $work_dir"/IGsF_Domain_Search/Per_Domain_Table_work.tab"
+  rm $work_dir"/IGsF_Domain_Search/Work.aa"
+fi
+
+
+################################################################################
+################################################################################
+################################################################################
+
+
+if [ "$SEARCH_CREP_FREP_GREP" == "TRUE" ]
+then
+  explore_orthofinder=$orthofinder_folder
   results_orthofinder=$(ls -d $explore_orthofinder"/OrthoFinder/Results_"*)
 
   rm -r $work_dir"/FREP_like_Search"
@@ -1392,23 +1133,23 @@ then
   mkdir $work_dir"/FREP_like_Search/Overlap_temp"
   mkdir $work_dir"/FREP_like_Search/Best_Candidates_ReviewNeded"
 
-  cat $Lu_FREP_prot $Dehilly_FREP_prot $Dehilly_CREP_prot $Dehilly_GREP_prot >> $work_dir"/FREP_like_Search/Reference_proteins.fasta"
+  cat $Lu_FREP_prot $Dheilly_FREP_prot $Dheilly_CREP_prot $Dheilly_GREP_prot >> $work_dir"/FREP_like_Search/Reference_proteins.fasta"
   makeblastdb -in $work_dir"/TransDecoder/Predict/PolyA_Transcripts_work.fasta.transdecoder.pep" -dbtype prot -parse_seqids -input_type fasta -out $work_dir"/FREP_like_Search/BLAST_Reference/Bsud_ref"
   blastp -query $work_dir"/FREP_like_Search/Reference_proteins.fasta" -db $work_dir"/FREP_like_Search/BLAST_Reference/Bsud_ref" -outfmt "6 std qcovs" -out $work_dir"/FREP_like_Search/FREP_Candidates_full.blastp" -qcov_hsp_perc 30 -num_threads $threads
-  awk -F "\t" -v iden=$blast_ident '{if ($3>=iden) print}' $work_dir"/FREP_like_Search/FREP_Candidates_full.blastp" >> $work_dir"/FREP_like_Search/FREP_Candidates.blastp"
+  awk -F "\t" -v iden=$crep_frep_grep_blast_ident '{if ($3>=iden) print}' $work_dir"/FREP_like_Search/FREP_Candidates_full.blastp" >> $work_dir"/FREP_like_Search/FREP_Candidates.blastp"
 
-  print_Fibrinogen_signatures=$(echo $Fibrinogen_signatures | tr " " "\n" | sed "s/^/FBD_Like:/" | tr "\n" " " | sed "s/ $//")
+  print_FBD_signatures=$(echo $FBD_signatures | tr " " "\n" | sed "s/^/FBD_Like:/" | tr "\n" " " | sed "s/ $//")
   print_C_lectin_signatures=$(echo $C_lectin_signatures | tr " " "\n" | sed "s/^/C-lectin_Like:/" | tr "\n" " " | sed "s/ $//")
   print_Galectin_signatures=$(echo $Galectin_signatures | tr " " "\n" | sed "s/^/Galectin_Like:/" | tr "\n" " " | sed "s/ $//")
   print_EGF_signatures=$(echo $EGF_signatures | tr " " "\n" | sed "s/^/EGF_Like:/" | tr "\n" " " | sed "s/ $//")
   print_Inmunoglobulin_signatures=$(echo $Inmunoglobulin_signatures | tr " " "\n" | sed "s/^/Inmunoglobulin_Like:/" | tr "\n" " " | sed "s/ $//")
 
-  echo "GeneID ProtID Type N_Blast_Hits Best_Hit Identity Qcoverage Signalp Secretomep Targetp N_TMHMM Total_IGsF Non_Overlaping_IGsF IGsF1 IGsF2 "$print_Fibrinogen_signatures" "$print_C_lectin_signatures" "$print_Galectin_signatures" "$print_EGF_signatures" "$print_Inmunoglobulin_signatures | tr " " "\t" >> $work_dir"/FREP_like_Search/Candidates.tab"
+  echo "GeneID ProtID Type N_Blast_Hits Best_Hit Identity Qcoverage Signalp Secretomep Targetp N_TMHMM Total_IGsF Non_Overlaping_IGsF IGsF1 IGsF2 "$print_FBD_signatures" "$print_C_lectin_signatures" "$print_Galectin_signatures" "$print_EGF_signatures" "$print_Inmunoglobulin_signatures | tr " " "\t" >> $work_dir"/FREP_like_Search/Candidates.tab"
 
   candidate_genes=$(awk -F "\t" '{print $2}' $work_dir"/FREP_like_Search/FREP_Candidates.blastp" | awk -F "." '{print $1"."$2}')
 
   # Genes with Fibrogen like Interprot signatures
-  for sign in $Fibrinogen_signatures
+  for sign in $FBD_signatures
   do
     add_genes=$(grep -w -F $sign $work_dir"/Interprot_Results/Results.tsv" | awk -F "\t" '{print $1}' | awk -F "." '{print $1"."$2}')
     candidate_genes=$(echo $candidate_genes" "$add_genes)
@@ -1427,10 +1168,6 @@ then
     add_genes=$(grep -w -F $sign $work_dir"/Interprot_Results/Results.tsv" | awk -F "\t" '{print $1}' | awk -F "." '{print $1"."$2}')
     candidate_genes=$(echo $candidate_genes" "$add_genes)
   done
-
-  # Genes with IGsF domains hits from Sam's team
-  # add_genes=$(awk -F "\t" '{print $1}' $work_dir"/IGsF_Domain_Search/Per_Domain_Table_work.tab" | grep -w -v "Prot_ID" | awk -F "." '{print $1"."$2}')
-  # candidate_genes=$(echo $candidate_genes" "$add_genes)
 
   # Doing Clasification
   candidate_genes=$(echo $candidate_genes | tr " " "\n" | sort -u)
@@ -1461,7 +1198,7 @@ then
       done
 
       registro_fibrinogen_signs=
-      for sign in $Fibrinogen_signatures
+      for sign in $FBD_signatures
       do
         check_hit=$(grep -c -w -F $sign $work_dir"/FREP_like_Search/interport.temp")
         overlap_signatures
@@ -1605,7 +1342,7 @@ then
             fi
           elif [ $check_Fibrogen -eq 1 ]
           then
-            interest_signatures=$Fibrinogen_signatures
+            interest_signatures=$FBD_signatures
             Type=FREP
             retrive_domain_locations
             Gene_putative_Type=$(echo "FREP:"$integrity)
@@ -1637,21 +1374,29 @@ fi
 ################################################################################
 ################################################################################
 
-if [ "$FREP_PHYLOGENY" == "TRUE" ]
+if [ "$CREP_FREP_PHYLOGENY" == "TRUE" ]
 then
-  explore_orthofinder=$mini_orthofinder_folder
+  explore_orthofinder=$orthofinder_folder
   results_orthofinder=$(ls -d $explore_orthofinder"/OrthoFinder/Results_"*)
 
   rm -r $work_dir"/FREP_like_Search/Filogeny"
   mkdir $work_dir"/FREP_like_Search/Filogeny"
   mkdir $work_dir"/FREP_like_Search/Filogeny/FREP"
   mkdir $work_dir"/FREP_like_Search/Filogeny/FREP/Luetal_ref"
-  mkdir $work_dir"/FREP_like_Search/Filogeny/FREP/Dehilly_ref"
+  mkdir $work_dir"/FREP_like_Search/Filogeny/FREP/Dheilly_ref"
   mkdir $work_dir"/FREP_like_Search/Filogeny/FREP/ALL_ref"
   mkdir $work_dir"/FREP_like_Search/Filogeny/CREP"
-  mkdir $work_dir"/FREP_like_Search/Filogeny/CREP/Dehilly_ref"
+  mkdir $work_dir"/FREP_like_Search/Filogeny/CREP/Dheilly_ref"
 
-  genes_Bsud=$(seqkit seq -n $work_dir"/FREP_like_Search/Best_Candidates_ReviewNeded/FREP_Full_candidates.aa" | awk -F "." '{print $1"."$2}' | sort -u | grep -w -F -v -f $exclude_seq_manual)
+  if [ -f $exclude_seq_manual]
+  then
+    echo "Excluding sequences on: "$exclude_seq_manual
+    genes_Bsud=$(seqkit seq -n $work_dir"/FREP_like_Search/Best_Candidates_ReviewNeded/FREP_Full_candidates.aa" | awk -F "." '{print $1"."$2}' | sort -u | grep -w -F -v -f $exclude_seq_manual)
+  else
+    echo "No file with manually excluded sequences at: "$exclude_seq_manual
+    genes_Bsud=$(seqkit seq -n $work_dir"/FREP_like_Search/Best_Candidates_ReviewNeded/FREP_Full_candidates.aa" | awk -F "." '{print $1"."$2}' | sort -u)
+  fi
+
   for gen in $genes_Bsud
   do
     echo $gen" FREP"
@@ -1675,16 +1420,16 @@ then
   cat $work_dir"/FREP_like_Search/Filogeny/FREP/FREP_Bsud.fasta" $storage_folder"/Reference.fasta" >> $storage_folder"/Run_Analysis.fasta"
   run_frep_crep_phylogeny
 
-  # 2) FREP Dehilly Reference
-  storage_folder=$work_dir"/FREP_like_Search/Filogeny/FREP/Dehilly_ref"
-  grupo_phy=FREP_Dehilly
-  cat $Dehilly_FREP_prot $work_dir"/FREP_like_Search/Filogeny/FREP/FREP_Bsud.fasta" >> $storage_folder"/Run_Analysis.fasta"
+  # 2) FREP Dheilly Reference
+  storage_folder=$work_dir"/FREP_like_Search/Filogeny/FREP/Dheilly_ref"
+  grupo_phy=FREP_Dheilly
+  cat $Dheilly_FREP_prot $work_dir"/FREP_like_Search/Filogeny/FREP/FREP_Bsud.fasta" >> $storage_folder"/Run_Analysis.fasta"
   run_frep_crep_phylogeny
 
   # 3) FREP All
   storage_folder=$work_dir"/FREP_like_Search/Filogeny/FREP/ALL_ref"
   grupo_phy=FREP_All
-  cat $work_dir"/FREP_like_Search/Filogeny/FREP/FREP_Bsud.fasta" $work_dir"/FREP_like_Search/Filogeny/FREP/Luetal_ref/Reference.fasta" $Dehilly_FREP_prot >> $storage_folder"/Run_Analysis.fasta"
+  cat $work_dir"/FREP_like_Search/Filogeny/FREP/FREP_Bsud.fasta" $work_dir"/FREP_like_Search/Filogeny/FREP/Luetal_ref/Reference.fasta" $Dheilly_FREP_prot >> $storage_folder"/Run_Analysis.fasta"
   run_frep_crep_phylogeny
 
   # 4) CREP
@@ -1699,9 +1444,9 @@ then
     echo $gen" "$pho | tr " " "\t" >> $work_dir"/FREP_like_Search/Filogeny/FREP/gene_pho.txt"
   done
 
-  storage_folder=$work_dir"/FREP_like_Search/Filogeny/CREP/Dehilly_ref"
+  storage_folder=$work_dir"/FREP_like_Search/Filogeny/CREP/Dheilly_ref"
   grupo_phy=CREP
-  cat $work_dir"/FREP_like_Search/Filogeny/CREP/CREP_Bsud.fasta" $Dehilly_CREP_prot >> $storage_folder"/Run_Analysis.fasta"
+  cat $work_dir"/FREP_like_Search/Filogeny/CREP/CREP_Bsud.fasta" $Dheilly_CREP_prot >> $storage_folder"/Run_Analysis.fasta"
   run_frep_crep_phylogeny
 fi
 
@@ -1709,14 +1454,14 @@ fi
 ################################################################################
 ################################################################################
 
-if [ "$SUP_TAB_PAPER_FREP" == "TRUE" ]
+if [ "$SUP_TAB_PAPER_CREP_FREP_GREP" == "TRUE" ]
 then
   rm $work_dir"/Final_Anotation_Files/Paper_Special_Tables/prot.temp"
-  rm $work_dir"/Final_Anotation_Files/Paper_Special_Tables/FREP_Sup_Table.txt"
+  rm $work_dir"/Final_Anotation_Files/Paper_Special_Tables/CREP_FREP_GREP_Sup_Table.txt"
   rm $work_dir"/Final_Anotation_Files/Paper_Special_Tables/interpro.temp"
 
   families=$(echo "CREP FREP GREP")
-  echo "Protein_ID Family Final_Selection Analysis Signature_accession Score Start End InterPro_annotation Description Signature_Type Final_Selection" | tr " " "\t"  >> $work_dir"/Final_Anotation_Files/Paper_Special_Tables/FREP_Sup_Table.txt"
+  echo "Protein_ID Family Final_Selection Analysis Signature_accession Score Start End InterPro_annotation Description Signature_Type Final_Selection" | tr " " "\t"  >> $work_dir"/Final_Anotation_Files/Paper_Special_Tables/CREP_FREP_GREP_Sup_Table.txt"
   for fam in $families
   do
     protein_candidates=$(grep "Protein:" $work_dir"/FREP_like_Search/Best_Candidates_ReviewNeded/"$fam"_candidates_domain_locations.tab" | awk -F " " '{print $2}')
@@ -1771,7 +1516,7 @@ then
         then
           signature=Other
         else
-          check_FBD=$(echo $Fibrinogen_signatures | grep -w -c $current_interpro)
+          check_FBD=$(echo $FBD_signatures | grep -w -c $current_interpro)
           check_immuno=$(echo $Inmunoglobulin_signatures | grep -w -c $current_interpro)
           check_clectin=$(echo $C_lectin_signatures | grep -w -c $current_interpro)
           check_galectin=$(echo $Galectin_signatures | grep -w -c $current_interpro)
@@ -1797,7 +1542,7 @@ then
         count=$(($count + 1))
       done
 
-      sort -n -k 7 $work_dir"/Final_Anotation_Files/Paper_Special_Tables/prot.temp" >> $work_dir"/Final_Anotation_Files/Paper_Special_Tables/FREP_Sup_Table.txt"
+      sort -n -k 7 $work_dir"/Final_Anotation_Files/Paper_Special_Tables/prot.temp" >> $work_dir"/Final_Anotation_Files/Paper_Special_Tables/CREP_FREP_GREP_Sup_Table.txt"
 
       rm $work_dir"/Final_Anotation_Files/Paper_Special_Tables/prot.temp"
 
@@ -1837,7 +1582,7 @@ fi
 ################################################################################
 ################################################################################
 
-if [ "$FINAL_SUMMARY" == "TRUE" ]
+if [ "$SUMMARY" == "TRUE" ]
 then
   rm -r $work_dir"/Final_Anotation_Files"
   mkdir $work_dir"/Final_Anotation_Files"
@@ -1865,114 +1610,81 @@ then
   done
 fi
 
-if [ "$FINAL_Generate_GO_Lists" == "TRUE" ]
+#######################################################################################################################
+#######################################################################################################################
+#######################################################################################################################
+
+if [ "$PREPARE_ORTHOFINDER" == "TRUE" ]
 then
-  rm -r $work_dir"/GO_TERMS_TAB"
-  mkdir $work_dir"/GO_TERMS_TAB"
-  mkdir $work_dir"/GO_TERMS_TAB/Temp"
+  rm -r $orthofinder_folder
+  mkdir $orthofinder_folder
+  mkdir $orthofinder_folder"/Get_Orfs"
+  mkdir $orthofinder_folder"/Mito_Exclusion"
+  mkdir $orthofinder_folder"/Work_cDNA"
 
-  # Reference_Table
-  genes=$(grep -v "#" $work_dir"/Eggnog/Eggnog.emapper.go" | awk -F "\t" '{print $1}' | awk -F "." '{print $1"."$2"."}' | sort -u)
-  for gen in $genes
-  do
-    print_gene=$(echo $gen | awk -F "." '{print $1"."$2}')
-    echo $print_gene
+  work_species=$(ls $other_species_orthofinder"/"*".cds" | sed "s/.cds//" | sed "s/.*\///")
 
-    gos=$(grep -F $gen $work_dir"/Eggnog/Eggnog.emapper.go" | awk -F "\t" '{print $2}' | sed "s/-//g" | tr "," "\n" | sort -u | grep . | tr "\n" "," | sed "s/,$//" )
-    echo $print_gene" "$gos | tr " " "\t" >> $work_dir"/GO_TERMS_TAB/Full_Genome_GO.tab"
-  done
-
-  # Full Genome
-  awk -F "\t" '{print $1}' $work_dir"/GO_TERMS_TAB/Full_Genome_GO.tab" >> $work_dir"/GO_TERMS_TAB/Full_Genome.id"
-  # Plasmatic Membrane
-  grep -w Plasmatic_Membrane $work_dir"/DeepTMHMM/Membrane_candidates/Summary_candidates.tab" | awk -F "\t" '{print $1}' | awk -F "." '{print $1"."$2}' | sort -u  >> $work_dir"/GO_TERMS_TAB/Plasmatic_Membrane_GO.tab"
-  # SignalP Tab
-  grep -w -v "Prediction" $work_dir"/Location_Signals/SignalP_results.txt"| grep -v "#" | awk -F "\t" '{print $1}' | awk -F "." '{print $1"."$2}'  | grep -F -w -v -f $work_dir"/GO_TERMS_TAB/Plasmatic_Membrane_GO.tab" | sort -u  >> $work_dir"/GO_TERMS_TAB/SignalP_GO.tab"
-  # Mito Tab
-  grep -w -v "Prediction" $work_dir"/Location_Signals/Mitocondria_results.txt" | grep -v "#" | awk -F "\t" '{print $1}' | awk -F "." '{print $1"."$2}' | sort -u  >> $work_dir"/GO_TERMS_TAB/Exported_Mitochondria_GO.tab"
-  # SecretomeP Tab
-  grep -w -v "Weighted_by_prior" $work_dir"/Location_Signals/SecretomeP_results.txt" | awk -F "\t" '{print $1}' | awk -F "." '{print $1"."$2}'  | grep -F -w -v -f $work_dir"/GO_TERMS_TAB/Plasmatic_Membrane_GO.tab" | sort -u  >> $work_dir"/GO_TERMS_TAB/SecretomeP_GO.tab"
-  # Full Secretome
-  cat $work_dir"/GO_TERMS_TAB/SecretomeP_GO.tab" $work_dir"/GO_TERMS_TAB/SignalP_GO.tab" | sort -u  >> $work_dir"/GO_TERMS_TAB/Full_Secretome_GO.tab"
-  # Alternative secretion pathway
-  grep -w -v -f $work_dir"/GO_TERMS_TAB/SignalP_GO.tab" $work_dir"/GO_TERMS_TAB/SecretomeP_GO.tab" | sort -u  >> $work_dir"/GO_TERMS_TAB/Alternative_secretion_GO.tab"
-fi
-
-#######################################################################################################################
-#######################################################################################################################
-#######################################################################################################################
-
-if [ "$PREPARE_MINI_ORTHOFINDER" == "TRUE" ]
-then
-  rm -r $mini_orthofinder_folder
-  mkdir $mini_orthofinder_folder
-  mkdir $mini_orthofinder_folder"/Get_Orfs"
-  mkdir $mini_orthofinder_folder"/Mito_Exclusion"
-  mkdir $mini_orthofinder_folder"/Work_cDNA"
-
-  work_species=$(ls $mini_other_species_orthofinder"/"*".cds" | sed "s/.cds//" | sed "s/.*\///")
-
-  makeblastdb -in $mini_other_species_mitochondria"/All_mito.fasta" -dbtype nucl -parse_seqids -input_type fasta -out $mini_orthofinder_folder"/Mito_Exclusion/Reference_mit"
+  makeblastdb -in $other_species_mitochondria -dbtype nucl -parse_seqids -input_type fasta -out $orthofinder_folder"/Mito_Exclusion/Reference_mit"
 
   for spe in $work_species
   do
     echo "Peparing: "$spe
-    mkdir $mini_orthofinder_folder"/Get_Orfs/"$spe
-    mkdir $mini_orthofinder_folder"/Get_Orfs/"$spe"/Mitocondria"
+    mkdir $orthofinder_folder"/Get_Orfs/"$spe
+    mkdir $orthofinder_folder"/Get_Orfs/"$spe"/Mitocondria"
 
     check_dash=$(echo $dash_ids | grep -c $spe)
     if [ $check_dash -eq 0 ]
     then
-      transcripts=$(seqkit seq -n -i $mini_other_species_orthofinder"/"$spe".cds" | awk -F "." '{print $1}' | sort -u)
+      transcripts=$(seqkit seq -n -i $other_species_orthofinder"/"$spe".cds" | awk -F "." '{print $1}' | sort -u)
     else
-      transcripts=$(seqkit seq -n -i $mini_other_species_orthofinder"/"$spe".cds" | awk -F "-" '{print $1}' | sort -u)
+      transcripts=$(seqkit seq -n -i $other_species_orthofinder"/"$spe".cds" | awk -F "-" '{print $1}' | sort -u)
     fi
 
     echo "Mitochondra BLAST: "$spe
-    blastn -query $mini_other_species_orthofinder"/"$spe".cds" -db $mini_orthofinder_folder"/Mito_Exclusion/Reference_mit" -outfmt "6 std" -out $mini_orthofinder_folder"/Get_Orfs/"$spe"/Mitocondria/"$spe_mito".blastn" -perc_identity 70 -num_threads $threads -qcov_hsp_perc 50
+    blastn -query $other_species_orthofinder"/"$spe".cds" -db $orthofinder_folder"/Mito_Exclusion/Reference_mit" -outfmt "6 std" -out $orthofinder_folder"/Get_Orfs/"$spe"/Mitocondria/"$spe_mito".blastn" -perc_identity 70 -num_threads $threads -qcov_hsp_perc 50
 
-    check_hits=$(grep -c . $mini_orthofinder_folder"/Get_Orfs/"$spe"/Mitocondria/"$spe_mito".blastn")
+    check_hits=$(grep -c . $orthofinder_folder"/Get_Orfs/"$spe"/Mitocondria/"$spe_mito".blastn")
     if [ $check_hits -gt 0 ]
     then
-      awk -F "\t" '{print $1}' $mini_orthofinder_folder"/Get_Orfs/"$spe"/Mitocondria/"$spe_mito".blastn" >> $mini_orthofinder_folder"/Get_Orfs/"$spe"/Exclude.temp"
-      seqkit grep -j $threads -v -f $mini_orthofinder_folder"/Get_Orfs/"$spe"/Exclude.temp" $mini_other_species_orthofinder"/"$spe".cds" | seqkit seq -i >> $mini_orthofinder_folder"/Get_Orfs/"$spe"/"$spe"_temp.cds"
+      awk -F "\t" '{print $1}' $orthofinder_folder"/Get_Orfs/"$spe"/Mitocondria/"$spe_mito".blastn" >> $orthofinder_folder"/Get_Orfs/"$spe"/Exclude.temp"
+      seqkit grep -j $threads -v -f $orthofinder_folder"/Get_Orfs/"$spe"/Exclude.temp" $other_species_orthofinder"/"$spe".cds" | seqkit seq -i >> $orthofinder_folder"/Get_Orfs/"$spe"/"$spe"_temp.cds"
     else
-      seqkit seq -i $mini_other_species_orthofinder"/"$spe".cds" >> $mini_orthofinder_folder"/Get_Orfs/"$spe"/"$spe"_temp.cds"
+      seqkit seq -i $other_species_orthofinder"/"$spe".cds" >> $orthofinder_folder"/Get_Orfs/"$spe"/"$spe"_temp.cds"
     fi
 
     # New issue! Transdecoder doesn't works if you already removed the UTRs, as is the for most of these sequeces.
     # I will keep it simple since in theory the work is already done
-    getorf -sequence $mini_orthofinder_folder"/Get_Orfs/"$spe"/"$spe"_temp.cds" -outseq $mini_orthofinder_folder"/Get_Orfs/"$spe"/"$spe"_temp.orf" -noreverse -minsize 150
+    getorf -sequence $orthofinder_folder"/Get_Orfs/"$spe"/"$spe"_temp.cds" -outseq $orthofinder_folder"/Get_Orfs/"$spe"/"$spe"_temp.orf" -noreverse -minsize 150
 
     for trans in $transcripts
     do
       echo "Procesing: "$trans" --- "$spe
       if [ $check_dash -eq 0 ]
       then
-        check_orf=$(grep -F -c $trans"." $mini_orthofinder_folder"/Get_Orfs/"$spe"/"$spe"_temp.orf" )
+        check_orf=$(grep -F -c $trans"." $orthofinder_folder"/Get_Orfs/"$spe"/"$spe"_temp.orf" )
       else
-        check_orf=$(grep -F -c $trans"-" $mini_orthofinder_folder"/Get_Orfs/"$spe"/"$spe"_temp.orf" )
+        check_orf=$(grep -F -c $trans"-" $orthofinder_folder"/Get_Orfs/"$spe"/"$spe"_temp.orf" )
       fi
 
       if [ $check_orf -gt 0 ]
       then
         if [ $check_dash -eq 0 ]
         then
-          seqkit grep -j $threads -r -p $trans\\. $mini_orthofinder_folder"/Get_Orfs/"$spe"/"$spe"_temp.orf" | seqkit fx2tab -n -l | tr -d " " | sort -n -k 2 > $mini_orthofinder_folder"/Get_Orfs/orf_len.tmp"
+          seqkit grep -j $threads -r -p $trans\\. $orthofinder_folder"/Get_Orfs/"$spe"/"$spe"_temp.orf" | seqkit fx2tab -n -l | tr -d " " | sort -n -k 2 > $orthofinder_folder"/Get_Orfs/orf_len.tmp"
         else
-          seqkit grep -j $threads -r -p $trans"-" $mini_orthofinder_folder"/Get_Orfs/"$spe"/"$spe"_temp.orf" | seqkit fx2tab -n -l | tr -d " " | sort -n -k 2 > $mini_orthofinder_folder"/Get_Orfs/orf_len.tmp"
+          seqkit grep -j $threads -r -p $trans"-" $orthofinder_folder"/Get_Orfs/"$spe"/"$spe"_temp.orf" | seqkit fx2tab -n -l | tr -d " " | sort -n -k 2 > $orthofinder_folder"/Get_Orfs/orf_len.tmp"
         fi
 
-        best_len=$(tail -n 1 $mini_orthofinder_folder"/Get_Orfs/orf_len.tmp" | awk -F "\t" '{print $2}')
-        check_num_orf=$(awk -F "\t" -v len=$best_len '{if ($2==len) print}' $mini_orthofinder_folder"/Get_Orfs/orf_len.tmp" | grep -c .)
+        best_len=$(tail -n 1 $orthofinder_folder"/Get_Orfs/orf_len.tmp" | awk -F "\t" '{print $2}')
+        check_num_orf=$(awk -F "\t" -v len=$best_len '{if ($2==len) print}' $orthofinder_folder"/Get_Orfs/orf_len.tmp" | grep -c .)
 
         if [ $check_num_orf -eq 1 ]
         then
-          best_orf=$(awk -F "\t" -v len=$best_len '{if ($2==len) print $1}' $mini_orthofinder_folder"/Get_Orfs/orf_len.tmp" | tr -d " " | awk -F "\t" '{print $1}')
+          best_orf=$(awk -F "\t" -v len=$best_len '{if ($2==len) print $1}' $orthofinder_folder"/Get_Orfs/orf_len.tmp" | tr -d " " | awk -F "\t" '{print $1}')
         else
-          echo $trans >> $mini_orthofinder_folder"/Get_Orfs/"$spe"/Trouble_Makers.txt"
-          best_coord=$(awk -F "\t" -v len=$best_len '{if ($2==len) print $1}' $mini_orthofinder_folder"/Get_Orfs/orf_len.tmp" | tr -d " " | awk -F "\t" '{print $1}' | sed "s/.*\[//" | tr -d "]" | tr "-" "\t" | sort -n -k 1 | head -n 1 | tr "\t" "-")
-          best_orf=$(awk -F "\t" -v len=$best_len '{if ($2==len) print $1}' $mini_orthofinder_folder"/Get_Orfs/orf_len.tmp" | tr -d " " | awk -F "\t" '{print $1}' | grep -w $best_coord | head -n 1)
+          echo $trans >> $orthofinder_folder"/Get_Orfs/"$spe"/Trouble_Makers.txt"
+          best_coord=$(awk -F "\t" -v len=$best_len '{if ($2==len) print $1}' $orthofinder_folder"/Get_Orfs/orf_len.tmp" | tr -d " " | awk -F "\t" '{print $1}' | sed "s/.*\[//" | tr -d "]" | tr "-" "\t" | sort -n -k 1 | head -n 1 | tr "\t" "-")
+          best_orf=$(awk -F "\t" -v len=$best_len '{if ($2==len) print $1}' $orthofinder_folder"/Get_Orfs/orf_len.tmp" | tr -d " " | awk -F "\t" '{print $1}' | grep -w $best_coord | head -n 1)
         fi
 
         best_orf_id=$(echo $best_orf | sed "s/\[.*//")
@@ -1981,111 +1693,43 @@ then
 
         coords=$(echo $best_orf | sed "s/.*\[//" | sed "s/\]//" | tr "-" ":")
 
-        seqkit grep -j $threads -p $best_orf_id $mini_orthofinder_folder"/Get_Orfs/"$spe"/"$spe"_temp.orf" | sed "s/>.*/>$print_id/" >> $mini_orthofinder_folder"/"$spe".pep"
-        seqkit grep -j $threads -p $print_id $mini_orthofinder_folder"/Get_Orfs/"$spe"/"$spe"_temp.cds" | seqkit subseq -r $coords | seqkit seq -i >> $mini_orthofinder_folder"/Work_cDNA/"$spe".cds"
+        seqkit grep -j $threads -p $best_orf_id $orthofinder_folder"/Get_Orfs/"$spe"/"$spe"_temp.orf" | sed "s/>.*/>$print_id/" >> $orthofinder_folder"/"$spe".pep"
+        seqkit grep -j $threads -p $print_id $orthofinder_folder"/Get_Orfs/"$spe"/"$spe"_temp.cds" | seqkit subseq -r $coords | seqkit seq -i >> $orthofinder_folder"/Work_cDNA/"$spe".cds"
       else
-        echo $trans >> $mini_orthofinder_folder"/Get_Orfs/"$spe"/Genes_no_Good_orf.txt"
+        echo $trans >> $orthofinder_folder"/Get_Orfs/"$spe"/Genes_no_Good_orf.txt"
       fi
     done
   done
 
-  seqkit fx2tab -n -i -l $work_dir"/TransDecoder/Predict/PolyA_Transcripts_work.fasta.transdecoder.pep" >> $mini_orthofinder_folder"/lenght.temp"
-  extract_peps=$(awk -F "\t" '{print $1}' $mini_orthofinder_folder"/lenght.temp" | awk -F "." '{print $1"."$2}' | sort -u)
+  seqkit fx2tab -n -i -l $work_dir"/TransDecoder/Predict/PolyA_Transcripts_work.fasta.transdecoder.pep" >> $orthofinder_folder"/lenght.temp"
+  extract_peps=$(awk -F "\t" '{print $1}' $orthofinder_folder"/lenght.temp" | awk -F "." '{print $1"."$2}' | sort -u)
   for ext in $extract_peps
   do
-    take=$(grep -w $ext $mini_orthofinder_folder"/lenght.temp" | sort -n -k 2 | tail -n 1 | awk -F "\t" '{print $1}')
+    take=$(grep -w $ext $orthofinder_folder"/lenght.temp" | sort -n -k 2 | tail -n 1 | awk -F "\t" '{print $1}')
     echo $ext" "$take
-    seqkit grep -j $threads -p $take $work_dir"/TransDecoder/Predict/PolyA_Transcripts_work.fasta.transdecoder.cds" | seqkit seq -i | seqkit seq -w 0 | sed "s/TAA$//"  | sed "s/TGA$//"  | sed "s/TAG$//" | seqkit seq -w 60 >> $mini_orthofinder_folder"/Work_cDNA/Biomphalaria_sudanica.cds"
-    seqkit grep -j $threads -p $take $work_dir"/TransDecoder/Predict/PolyA_Transcripts_work.fasta.transdecoder.pep" | seqkit seq -i | sed "s/\*$//" >> $mini_orthofinder_folder"/Biomphalaria_sudanica.pep"
+    seqkit grep -j $threads -p $take $work_dir"/TransDecoder/Predict/PolyA_Transcripts_work.fasta.transdecoder.cds" | seqkit seq -i | seqkit seq -w 0 | sed "s/TAA$//"  | sed "s/TGA$//"  | sed "s/TAG$//" | seqkit seq -w 60 >> $orthofinder_folder"/Work_cDNA/Biomphalaria_sudanica.cds"
+    seqkit grep -j $threads -p $take $work_dir"/TransDecoder/Predict/PolyA_Transcripts_work.fasta.transdecoder.pep" | seqkit seq -i | sed "s/\*$//" >> $orthofinder_folder"/Biomphalaria_sudanica.pep"
   done
-  rm $mini_orthofinder_folder"/lenght.temp"
+  rm $orthofinder_folder"/lenght.temp"
 fi
 
 ################################################################################
 ################################################################################
 ################################################################################
 
-if [ "$MINI_ORTHOFINDER" == "TRUE" ]
+if [ "$ORTHOFINDER" == "TRUE" ]
 then
-  rm -r $mini_orthofinder_folder"/OrthoFinder"
-  orthofinder -f $mini_orthofinder_folder -t $threads -a $threads
+  rm -r $orthofinder_folder"/OrthoFinder"
+  orthofinder -f $orthofinder_folder -t $threads -a $threads
 fi
 
 ################################################################################
 ################################################################################
 ################################################################################
 
-if [ "$MINI_ORTHOFINDER_EGGNOG" == "TRUE" ]
+if [ "$CAFE_EXPANSION_PREPARE" == "TRUE" ]
 then
-  working_folder=$mini_orthofinder_folder
-
-  rm -r $working_folder"/eggnog_Orthofinder"
-  mkdir $working_folder"/eggnog_Orthofinder"
-
-  seqkit seq -i $working_folder"/"*".pep" >> $working_folder"/eggnog_Orthofinder/work_seqs.fa"
-  emapper.py --override --cpu $threads -i  $working_folder"/eggnog_Orthofinder/work_seqs.fa" -o $work_dir"/Eggnog" --data_dir $eggnog_data
-
-  mv $work_dir"/Eggnog."* $working_folder"/eggnog_Orthofinder"
-  awk -F "\t" '{print $1"\t"$10}' $working_folder"/eggnog_Orthofinder/Eggnog.emapper.annotations" >> $working_folder"/eggnog_Orthofinder/Eggnog.emapper.go"
-fi
-
-################################################################################
-################################################################################
-################################################################################
-
-if [ "$MINI_ORTHOFINDER_EGGNOG_FOR_PHO" == "TRUE" ]
-then
-  working_folder=$mini_orthofinder_folder
-  results_orthofinder=$(ls -d $mini_orthofinder_folder"/OrthoFinder/Results_"*)
-
-  rm -r $working_folder"/eggnog_Orthofinder/For_Enrichment"
-  mkdir $working_folder"/eggnog_Orthofinder/For_Enrichment"
-
-  count=2
-  recorrer=$(grep -c . $results_orthofinder"/Phylogenetic_Hierarchical_Orthogroups/N0.tsv")
-
-  while [ $count -le $recorrer ]
-  do
-    pho=$(sed -n $count"p" $results_orthofinder"/Phylogenetic_Hierarchical_Orthogroups/N0.tsv" | awk -F "\t" '{print $1}')
-    sed -n $count"p" $results_orthofinder"/Phylogenetic_Hierarchical_Orthogroups/N0.tsv"  | tr "\t" "\n" | sed 1,3d | tr -d " " | tr "," "\n" | grep . > $working_folder"/eggnog_Orthofinder/For_Enrichment/Temp_file"
-    go_terms=$(grep -w -F -f $working_folder"/eggnog_Orthofinder/For_Enrichment/Temp_file" $working_folder"/eggnog_Orthofinder/Eggnog.emapper.go" | awk -F "\t" '{print $2}' | tr "," "\n" | sort -u | grep GO | tr "\n" "," | sed "s/,$//")
-
-    echo $pho" "$count"/"$recorrer
-    echo $pho" "$go_terms | tr " " "\t" >> $working_folder"/eggnog_Orthofinder/For_Enrichment/Background_PHO_All.txt"
-    count=$(($count + 1))
-  done
-fi
-
-################################################################################
-################################################################################
-################################################################################
-
-if [ "$MINI_ORTHOFINDER_INTERPROT" == "TRUE" ]
-then
-  # conda activate Interprot
-  working_folder=$mini_orthofinder_folder
-  species=$(ls $working_folder"/"*pep | sed "s/.*\///" | sed "s/.pep//")
-
-  rm -r $working_folder"/Interprot_Orthofinder"
-  mkdir $working_folder"/Interprot_Orthofinder"
-
-  for spe in $species
-  do
-    if [ ! -d $working_folder"/Interprot_Orthofinder/"$spe ]
-    then
-      mkdir $working_folder"/Interprot_Orthofinder/"$spe
-      $interprot_path"/interproscan.sh" -cpu 20 -f TSV -pa -b $working_folder"/Interprot_Orthofinder/"$spe"/Results" -dra -i  $working_folder"/"$spe".pep"
-    fi
-  done
-fi
-
-################################################################################
-################################################################################
-################################################################################
-
-if [ "$MINI_CAFE_EXPANSION_PREPARE" == "TRUE" ]
-then
-  explore_orthofinder=$mini_orthofinder_folder
+  explore_orthofinder=$orthofinder_folder
   results_orthofinder=$(ls -d $explore_orthofinder"/OrthoFinder/Results_"*)
   prepare_cafe
 fi
@@ -2094,9 +1738,9 @@ fi
 ################################################################################
 ################################################################################
 
-if [ "$MINI_CAFE_EXPANSION_TEST_RUNS" == "TRUE" ]
+if [ "$CAFE_EXPANSION_TEST_RUNS" == "TRUE" ]
 then
-  explore_orthofinder=$mini_orthofinder_folder
+  explore_orthofinder=$orthofinder_folder
   results_orthofinder=$(ls -d $explore_orthofinder"/OrthoFinder/Results_"*)
   run_cafe
 fi
@@ -2105,9 +1749,9 @@ fi
 ################################################################################
 ################################################################################
 
-if [ "$MINI_CAFE_EXPANSION_DEF_RUN" == "TRUE" ]
+if [ "$CAFE_EXPANSION_DEF_RUN" == "TRUE" ]
 then
-  explore_orthofinder=$mini_orthofinder_folder
+  explore_orthofinder=$orthofinder_folder
   results_orthofinder=$(ls -d $explore_orthofinder"/OrthoFinder/Results_"*)
   interest_nodes_file=$explore_orthofinder"/Interest_nodes_CAFE.txt"
   cafe_def_run
@@ -2117,26 +1761,9 @@ fi
 ################################################################################
 ################################################################################
 
-if [ "$MINI_CAFE_EXPANSION_ANOT_INTERPROT" == "TRUE" ]
+if [ "$CAFE_EXPANSION_ANOT_EGGNOG" == "TRUE" ]
 then
-  # conda activate Interprot
-  working_folder=$mini_orthofinder_folder"/CAFE_Expansion/DEF_Run"
-
-  rm -r $working_folder"/Interprot_per_Fam"
-  mkdir $working_folder"/Interprot_per_Fam"
-  rm $working_folder"/Sequences/Per_Family/All.pep"
-
-  cat $working_folder"/Sequences/Per_Family/"*".pep" >> $working_folder"/Sequences/Per_Family/All.pep"
-  $interprot_path"/interproscan.sh" -f TSV --goterms -pa -b $working_folder"/Interprot_per_Fam/All_PHO_Interpro" -dra -i $working_folder"/Sequences/Per_Family/All.pep"
-fi
-
-################################################################################
-################################################################################
-################################################################################
-
-if [ "$MINI_CAFE_EXPANSION_ANOT_EGGNOG" == "TRUE" ]
-then
-  working_folder=$mini_orthofinder_folder"/CAFE_Expansion/DEF_Run"
+  working_folder=$orthofinder_folder"/CAFE_Expansion/DEF_Run"
 
   rm -r $working_folder"/Eggnog_Species"
   mkdir $working_folder"/Eggnog_Species"
@@ -2156,11 +1783,11 @@ fi
 ################################################################################
 ################################################################################
 
-if [ "$MINI_CAFE_EXPANSION_ANOT_PREPARE_GO" == "TRUE" ]
+if [ "$CAFE_EXPANSION_ANOT_PREPARE_GO" == "TRUE" ]
 then
-  explore_orthofinder=$mini_orthofinder_folder
+  explore_orthofinder=$orthofinder_folder
   results_orthofinder=$(ls -d $explore_orthofinder"/OrthoFinder/Results_"*)
-  working_folder=$mini_orthofinder_folder"/CAFE_Expansion/DEF_Run"
+  working_folder=$orthofinder_folder"/CAFE_Expansion/DEF_Run"
 
   rm -r $working_folder"/GO_TERM"
   mkdir $working_folder"/GO_TERM"
@@ -2191,7 +1818,7 @@ fi
 ################################################################################
 ################################################################################
 
-if [ "$FINAL_LOCATION_TABLE" == "TRUE" ]
+if [ "$LOCATION_TABLE" == "TRUE" ]
 then
   rm -r $work_dir"/Final_Anotation_Files/Paper_Special_Tables"
   mkdir $work_dir"/Final_Anotation_Files/Paper_Special_Tables"
@@ -2325,7 +1952,7 @@ fi
 ################################################################################
 ################################################################################
 
-if [ "$FINAL_GFF" == "TRUE" ]
+if [ "$GFF" == "TRUE" ]
 then
   # All the GFFs are on different formats. This section puts them all toguether and homogenises some key fields
 
@@ -2401,7 +2028,7 @@ then
   sed "s/Name=/ID=/g" $work_dir"/Ribosome/Ribosomes.gff" | sed "s/product=/Name=/g" >> $work_dir"/Final_Anotation_Files/Full_GFF/Intermediary/Ribosomes.gff"
 
   chromosomes=$(seqkit seq -n -i $genome_file)
-  # chromosomes=$(echo "scaffold_68 "$exclude_mitochondria)
+
   for chr in $chromosomes
   do
     echo $chr
@@ -2513,7 +2140,7 @@ fi
 ################################################################################
 ################################################################################
 
-if [ "$FINAL_GFF_SORT" == "TRUE" ]
+if [ "$GFF_SORT" == "TRUE" ]
 then
   rm $work_dir"/Final_Anotation_Files/Full_GFF/Bsudanica_Anotation_Full.gff"
   rm -r $work_dir"/Final_Anotation_Files/Full_GFF/Temp_sort"
