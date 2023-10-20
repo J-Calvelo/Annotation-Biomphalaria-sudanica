@@ -2,7 +2,7 @@
 Bioinformatic pipline utiliced in XXXXXX for the annotation of Biomphalaria sudanica.
 
 ## Publication_Bsudanica_annotation.sh
-The script is subdevided into several blocks of analysis and/or file preparation in order to facilitate re-runs. Which blocks are ran at a time can be controlled by setting to true variables located from lines 12 to 120 (all written in all caps). Other important variables for the run are located betwee lines 123 to 200. Some will be discussed now while others more specific will be mentioned as they become relevant:
+The script is subdevided into several blocks of analysis and/or file preparation in order to facilitate re-runs. Which blocks are ran at a time can be controlled by setting to true variables located from lines 7 to 52 (all written in all caps). Other important variables for the run are located betwee lines 59 to 113. Some will be discussed now while others more specific will be mentioned as they become relevant:
 
 ### General variables:
 1) species_name: Name for the species being annotated
@@ -68,7 +68,7 @@ Setting this variable to TRUE will map the Illuimina reads to the genome
 #### Required software: 
 - STAR (https://github.com/alexdobin/STAR/tree/master)
 #### Other Variables:
-- NA
+- star_index_num: Value recomended for the genome assembly size for --genomeChrBinNbits and --genomeSAindexNbases 
 
 ### 7) STRINGTIE_TRANS
 Setting this variable to TRUE will combine the read mappings of Illumina and PACBIO reads to annotate the genome using Stringtie v2.2
@@ -256,6 +256,7 @@ Setting this variable to TRUE will identify candidates members of the CREP, FREP
 - seqkit (https://github.com/shenwei356/seqkit)
 - BLAST+ (http://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs)
 #### Other Variables: 
+- crep_frep_grep_blast_ident: Identity cutoff for the BLAST search against known members of these families.
 - Fibrinogen_signatures: List separated by white spaces of interpro signatures associated with FBD domains
 - C_lectin_signatures: List separated by white spaces of interpro signatures associated with c-lectin domains
 - Galectin_signatures: List separated by white spaces of interpro signatures associated with galectin domains
