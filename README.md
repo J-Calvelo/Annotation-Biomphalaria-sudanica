@@ -230,16 +230,40 @@ Setting this variable to TRUE will identify IgSF domains based on custom hmmer p
 #### Other Variables:
 - igsf_hmmer_profile: Full path to a file with custom IgsF domains (IgSF1 and IgSF2). Originally designed in:  https://doi.org/10.1371/journal.pntd.0008780
 
-# 20) Mini_Orthofinder (Orthofinder but just with a couple of species) # requires the conda environment: conda activate Orthofinder
-PREPARE_MINI_ORTHOFINDER=FALSE
-MINI_ORTHOFINDER=FALSE
-MINI_ORTHOFINDER_EGGNOG=FALSE # Requires conca activate Eggnog
-MINI_ORTHOFINDER_EGGNOG_FOR_PHO=FALSE
-MINI_ORTHOFINDER_INTERPROT=FALSE # Requires conca activate Interprot
+### 24) PREPARE_ORTHOFINDER
+Setting this variable to TRUE will prepare the input files to run Orthofinder. It requires the specification of several folders with input data. The longest reported isoform of each nuclear gene will be selected.
+#### Required software:
+- Emboss (http://emboss.open-bio.org)
+- BLAST+ (http://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs)
+- seqkit (https://github.com/shenwei356/seqkit)
+#### Other Variables:
+- orthofinder_folder: Full path of the folder where the Orthofinder is going to be run
+- other_species_orthofinder: Full path to a folder with the cDNA where the Orthofinder is going to be run. Files inside must contain their cDNA and end in ".cds"
+- other_species_mitochondria: Full path to a file with mitochondrial sequences of the target species
+- dash_ids: List separated by white species where Isoforms IDs fields are separated by "-" instead of "."
 
+### 25) ORTHOFINDER
+Setting this variable to TRUE will run Orthofinder with default parameters
+#### Required software:
+- Orthofinder (https://github.com/davidemms/OrthoFinder)
+#### Other Variables:
+- orthofinder_folder: Full path of the folder where the Orthofinder is going to be run
 
+### 26) ORTHOFINDER_EGGNOG
+Setting this variable to TRUE will assign GO terms to the predicted proteins using eggnog mapper for all sequences analysed by Orthofinder
+#### Required software:
+- eggnog-mapper (https://github.com/eggnogdb/eggnog-mapper/tree/master)
+#### Other Variables:
+- orthofinder_folder: Full path of the folder where the Orthofinder is going to be run
 
-### 24) SEARCH_CREP_FREP_GREP
+### 27) ORTHOFINDER_EGGNOG_FOR_HOG
+Setting this variable to TRUE will asign GO terms to each HOG identified by orthofinder, assuming that GO terms asigned to one of it's members applies to the whole group.
+#### Required software:
+- NA
+#### Other Variables:
+- orthofinder_folder: Full path of the folder where the Orthofinder is going to be run
+
+### 28) SEARCH_CREP_FREP_GREP
 Setting this variable to TRUE will identify candidates members of the CREP, FREP, GREP and other related proteins based on the absence or presence of protein domains. And BLAST hits to known members these protein families.
 #### Required software:
 - seqkit (https://github.com/shenwei356/seqkit)
@@ -258,20 +282,41 @@ Setting this variable to TRUE will identify candidates members of the CREP, FREP
 Note1: See main manuscript for the full description of the selecction procedure. Some of the sources of evidence were carried out as diagnostics.
 Note2: The initial classification was then revised manually in a case by case.
 
-### 25) CREP_FREP_PHYLOGENY
-Setting this variable to TRUE will align CREP and FREP sequences, trim them automatically and callculate their phylogenetic relationships with iqtree
+### 29) CREP_FREP_PHYLOGENY
+Setting this variable to TRUE will align CREP and FREP sequences, trim them automatically and callculate their phylogenetic relationships with iqtree. All sequences identified as Full will be included, with the exclusion of ones specified on a file (exclude_seq_manual)
 #### Required software:
 - seqkit (https://github.com/shenwei356/seqkit)
 - Trimal (https://github.com/inab/trimal)
+- iqtree (https://github.com/iqtree/iqtree2)
+#### Other Variables: 
+- exclude_seq_manual: Full path to a file with protein ids manually removed.
 
+### 30) SUP_TAB_PAPER_CREP_FREP_GREP
+Setting this variable to TRUE will summirize the results in a table 
+#### Required software:
+- NA
+#### Other Variables: 
+- NA
 
-SUP_TAB_PAPER_FREP=TRUE
-
-exclude_seq_manual=/home/amanda/PROYECTS/Project_Bsudanica/Bsudanica_Runs/Final_Genome_Annotation/FREP_like_Search/Best_Candidates_ReviewNeded/Manual_check_Missidentifications.txt # File with FREP and CREP candidates to be excluded because of anomalies in the predicted
-
+# 31) MINI_CAFE_EXPANSION_PREPARE
+Setting this variable to TRUE will generate all input files for CAFE, from Orthofinder's results
+#### Required software:
+- make_ultrametric.py (one of orthofinde's utility scripts https://github.com/davidemms/OrthoFinder)
+#### Other Variables: 
+- orthofinder_folder: Full path of the folder where the Orthofinder is going to be run
+- mini_ortho_min_Nspe: Minimun number of genes in the HOG to be considered.
+- ultrametic_tree_root_age: Age of the tree's root in Million years
+ 
+# 32) MINI_CAFE_EXPANSION_TEST_RUNS
+Setting this variable to TRUE will conduct test runs for CAFE within a range of parameters and repetitions, or until one of them fails to compute.
+#### Required software:
+- cafe5 (https://github.com/hahnlab/CAFE5)
+#### Other Variables: 
+end_kvalue: maximun number of K to test
+max_cafe_runs_perK: Maximun number of repetitions per K to conduct
+max_number_iterations: Makimun number of itterations done by CAFE
 
 # 21) Protein expansion: CAFE  # requires the basic conda environment: conda activate
-MINI_CAFE_EXPANSION_PREPARE=FALSE # Re-Pharses Orthofinder's results
 MINI_CAFE_EXPANSION_TEST_RUNS=FALSE # Runs CAFE test runs for manual analysis
 MINI_CAFE_EXPANSION_DEF_RUN=FALSE # Just runs the definitive run and summariced what families expanded or contracted
 MINI_CAFE_EXPANSION_ANOT_INTERPROT=FALSE # Runs interpro for all non-Bsudanica species and store the results # requires conda interprot
