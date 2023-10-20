@@ -285,7 +285,7 @@ Setting this variable to TRUE will summirize the results in a table
 #### Other Variables: 
 - NA
 
-### 29) MINI_CAFE_EXPANSION_PREPARE
+### 29) CAFE_EXPANSION_PREPARE
 Setting this variable to TRUE will generate all input files for CAFE, from Orthofinder's results
 #### Required software:
 - make_ultrametric.py (one of orthofinde's utility scripts https://github.com/davidemms/OrthoFinder)
@@ -294,7 +294,7 @@ Setting this variable to TRUE will generate all input files for CAFE, from Ortho
 - mini_ortho_min_Nspe: Minimun number of genes in the HOG to be considered.
 - ultrametic_tree_root_age: Age of the tree's root in Million years
  
-### 30) MINI_CAFE_EXPANSION_TEST_RUNS
+### 30) CAFE_EXPANSION_TEST_RUNS
 Setting this variable to TRUE will conduct test runs for CAFE within a range of parameters and repetitions, or until one of them fails to compute.
 #### Required software:
 - cafe5 (https://github.com/hahnlab/CAFE5)
@@ -304,7 +304,7 @@ Setting this variable to TRUE will conduct test runs for CAFE within a range of 
 - max_cafe_runs_perK: Maximun number of repetitions per K to conduct
 - max_number_iterations: Makimun number of itterations done by CAFE5
 
-### 31) MINI_CAFE_EXPANSION_DEF_RUN
+### 31) CAFE_EXPANSION_DEF_RUN
 Setting this variable to TRUE will conduct one final run of CAFE5 that will be taken as definitive.
 #### Required software:
 - cafe5 (https://github.com/hahnlab/CAFE5)
@@ -315,15 +315,32 @@ Setting this variable to TRUE will conduct one final run of CAFE5 that will be t
 - Def_Kvalue: The best K-value identified in the test runs
 - interest_nodes_file: Full path to a file with the node names separated by tabs: "Biomphalaria_glabrata_IM_GCA_025434175.1        <0>"
 
-MINI_CAFE_EXPANSION_ANOT_EGGNOG
+### 31) CAFE_EXPANSION_ANOT_EGGNOG
+Setting this variable to TRUE will run EGGNOG for all sequences anlaysed by CAFE5.
+#### Required software:
+- eggnog-mapper (https://github.com/eggnogdb/eggnog-mapper/tree/master)
+#### Other Variables:
+- orthofinder_folder: Full path of the folder where the Orthofinder is going to be run
+- eggnog_data: Full path to the folder with eggnog-mapper reference data
+
+### 32) CAFE_EXPANSION_ANOT_PREPARE_GO
+Setting this variable to TRUE will prepare input files for the Go term enrichment analysis at the HOG level. GO terms asigend to one of the members are assumed to be applicable for the entire group.
+#### Required software:
+- NA
+#### Other Variables:
+- orthofinder_folder: Full path of the folder where the Orthofinder is going to be run
+
+### 33) DATA_CROSS_INTERPROT_SIGNALP
+Setting this variable to TRUE will combine the secretion, mitochodrial signal petides and transmembrane tables with InterproScan Results
+#### Required software:
+- NA
+#### Other Variables:
+- NA
+
+### 33) DATA_CROSS_INTERPROT_SIGNALP
 
 
 
-MINI_CAFE_EXPANSION_ANOT_PREPARE_GO=FALSE
-
-# 22) Data crossings
-DATA_CROSS_INTERPROT_EGGNOG=FALSE # Registra que genes tienen las entradas de interprot identificadas como parte del sistema inmune
-DATA_CROSS_INTERPROT_SIGNALP=FALSE
 DATA_CROSS_POLYA_REPEATS=FALSE
 
 # 23) Final Summary # Requires the basic conda environment: conda activate
