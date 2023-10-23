@@ -263,7 +263,23 @@ Setting this variable to TRUE will run Orthofinder with default parameters
 #### Other Variables:
 - orthofinder_folder: Full path of the folder where the Orthofinder is going to be run
 
-### 29) SEARCH_CREP_FREP_GREP
+### 29) ORTHOFINDER_EGGNOG
+Setting this variable to TRUE will run EGGNOG for all sequences anlaysed by Orthofinder
+#### Required software:
+- eggnog-mapper (https://github.com/eggnogdb/eggnog-mapper/tree/master)
+- seqkit (https://github.com/shenwei356/seqkit)
+#### Other Variables:
+- orthofinder_folder: Full path of the folder where the Orthofinder is going to be run
+- eggnog_data: Full path to the folder with eggnog-mapper reference data
+
+### 30) ORTHOFINDER_EGGNOG_FOR_PHO
+Setting this variable to TRUE will reformat ORTHOFINDER_EGGNOG and asign go terms to each HOG by assuming that if a GO term was assigned to one member it applies to the entire group.
+#### Required software:
+- NA
+#### Other Variables:
+- orthofinder_folder: Full path of the folder where the Orthofinder is going to be run
+
+### 31) SEARCH_CREP_FREP_GREP
 Setting this variable to TRUE will identify candidates members of the CREP, FREP, GREP and other related proteins based on the absence or presence of protein domains. And BLAST hits to known members these protein families.
 #### Required software:
 - seqkit (https://github.com/shenwei356/seqkit)
@@ -283,7 +299,7 @@ Setting this variable to TRUE will identify candidates members of the CREP, FREP
 Note1: See main manuscript for the full description of the selecction procedure. Some of the sources of evidence were carried out as diagnostics.
 Note2: The initial classification was then revised manually in a case by case.
 
-### 30) CREP_FREP_PHYLOGENY
+### 32) CREP_FREP_PHYLOGENY
 Setting this variable to TRUE will align CREP and FREP sequences, trim them automatically and callculate their phylogenetic relationships with iqtree. All sequences identified as Full will be included, with the exclusion of ones specified on a file (exclude_seq_manual)
 #### Required software:
 - seqkit (https://github.com/shenwei356/seqkit)
@@ -292,14 +308,14 @@ Setting this variable to TRUE will align CREP and FREP sequences, trim them auto
 #### Other Variables: 
 - exclude_seq_manual: Full path to a file with protein ids manually removed.
 
-### 31) SUP_TAB_PAPER_CREP_FREP_GREP
+### 33) SUP_TAB_PAPER_CREP_FREP_GREP
 Setting this variable to TRUE will summirize the results in a table 
 #### Required software:
 - NA
 #### Other Variables: 
 - NA
 
-### 32) CAFE_EXPANSION_PREPARE
+### 34) CAFE_EXPANSION_PREPARE
 Setting this variable to TRUE will generate all input files for CAFE, from Orthofinder's results
 #### Required software:
 - make_ultrametric.py (one of orthofinde's utility scripts https://github.com/davidemms/OrthoFinder)
@@ -308,7 +324,7 @@ Setting this variable to TRUE will generate all input files for CAFE, from Ortho
 - mini_ortho_min_Nspe: Minimun number of genes in the HOG to be considered.
 - ultrametic_tree_root_age: Age of the tree's root in Million years
  
-### 33) CAFE_EXPANSION_TEST_RUNS
+### 35) CAFE_EXPANSION_TEST_RUNS
 Setting this variable to TRUE will conduct test runs for CAFE within a range of parameters and repetitions, or until one of them fails to compute.
 #### Required software:
 - cafe5 (https://github.com/hahnlab/CAFE5)
@@ -318,7 +334,7 @@ Setting this variable to TRUE will conduct test runs for CAFE within a range of 
 - max_cafe_runs_perK: Maximun number of repetitions per K to conduct
 - max_number_iterations: Makimun number of itterations done by CAFE5
 
-### 34) CAFE_EXPANSION_DEF_RUN
+### 36) CAFE_EXPANSION_DEF_RUN
 Setting this variable to TRUE will conduct one final run of CAFE5 that will be taken as definitive.
 #### Required software:
 - cafe5 (https://github.com/hahnlab/CAFE5)
@@ -329,7 +345,7 @@ Setting this variable to TRUE will conduct one final run of CAFE5 that will be t
 - Def_Kvalue: The best K-value identified in the test runs
 - interest_nodes_file: Full path to a file with the node names separated by tabs: "Biomphalaria_glabrata_IM_GCA_025434175.1        <0>"
 
-### 35) CAFE_EXPANSION_ANOT_EGGNOG
+### 37) CAFE_EXPANSION_ANOT_EGGNOG
 Setting this variable to TRUE will run EGGNOG for all sequences anlaysed by CAFE5.
 #### Required software:
 - eggnog-mapper (https://github.com/eggnogdb/eggnog-mapper/tree/master)
@@ -337,45 +353,41 @@ Setting this variable to TRUE will run EGGNOG for all sequences anlaysed by CAFE
 - orthofinder_folder: Full path of the folder where the Orthofinder is going to be run
 - eggnog_data: Full path to the folder with eggnog-mapper reference data
 
-### 36) CAFE_EXPANSION_ANOT_PREPARE_GO
-Setting this variable to TRUE will prepare input files for the Go term enrichment analysis at the HOG level. GO terms asigend to one of the members are assumed to be applicable for the entire group.
-#### Required software:
-- NA
-#### Other Variables:
-- orthofinder_folder: Full path of the folder where the Orthofinder is going to be run
-
-### 37) DATA_CROSS_POLYA_REPEATS
+### 38) DATA_CROSS_POLYA_REPEATS
 Setting this variable to TRUE will identify genes that overlap with repeated elements
 #### Required software:
 - NA
 #### Other Variables:
 - NA
 
-### 38) SUMMARY
+### 39) SUMMARY
 Setting this variable to TRUE will copy and move some result files for easier access
 #### Required software:
 - NA
 #### Other Variables:
 - NA
 
-### 39) LOCATION_TABLE
+### 40) LOCATION_TABLE
 Setting this variable to TRUE will compine the results of SignalP, TargetP, SecretomeP DeepTMHMM and InterproScan in a single table
 #### Required software:
 - NA
 #### Other Variables:
 - NA
 
-### 40) GFF
+### 41) GFF
 Setting this variable to TRUE will combine the resulting GFFs of Stringtie, Transdecoder, barrnap and tRNAscan-SE in a single GFF file. Also adding the InterproScan annotation to each gene.
 #### Required software:
 - seqkit (https://github.com/shenwei356/seqkit)
 #### Other Variables:
 - NA
 
-### 41) GFF_SORT
+### 42) GFF_SORT
 Setting this variable to TRUE will sort the resulting combined GFF. 
 #### Required software:
 - seqkit (https://github.com/shenwei356/seqkit)
 #### Other Variables:
 - NA
 Note: It is slower than gffread and hardcodded to work with this pipeline of analysis, but it preserves the UTR predictions.
+
+## Enriched_GO_Family_Expansion.R
+Thuis script takes the annootations obtained with module ORTHOFINDER_EGGNOG_FOR_PHO and the lists of expanded/contracted proteins identified by CAFE5 and estimates enriched GO Terms.
