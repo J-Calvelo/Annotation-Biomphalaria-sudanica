@@ -39,11 +39,12 @@ CREP_FREP_PHYLOGENY=FALSE
 SUP_TAB_PAPER_CREP_FREP_GREP=FALSE
 PREPARE_ORTHOFINDER=FALSE
 ORTHOFINDER=FALSE
+ORTHOFINDER_EGGNOG=FALSE
+ORTHOFINDER_EGGNOG_FOR_PHO=FALSE
 CAFE_EXPANSION_PREPARE=FALSE
 CAFE_EXPANSION_TEST_RUNS=FALSE
 CAFE_EXPANSION_DEF_RUN=FALSE
 CAFE_EXPANSION_ANOT_EGGNOG=FALSE
-CAFE_EXPANSION_ANOT_PREPARE_GO=FALSE
 DATA_CROSS_INTERPROT_SIGNALP=FALSE
 DATA_CROSS_POLYA_REPEATS=FALSE
 SUMMARY=FALSE
@@ -1727,6 +1728,51 @@ fi
 ################################################################################
 ################################################################################
 
+if [ "$ORTHOFINDER_EGGNOG" == "TRUE" ]
+then
+  working_folder=$orthofinder_folder
+
+  rm -r $working_folder"/eggnog_Orthofinder"
+  mkdir $working_folder"/eggnog_Orthofinder"
+
+  seqkit seq -i $working_folder"/"*".pep" >> $working_folder"/eggnog_Orthofinder/work_seqs.fa"
+  emapper.py --override --cpu $threads -i  $working_folder"/eggnog_Orthofinder/work_seqs.fa" -o $work_dir"/Eggnog" --data_dir $eggnog_data
+
+  mv $work_dir"/Eggnog."* $working_folder"/eggnog_Orthofinder"
+  awk -F "\t" '{print $1"\t"$10}' $working_folder"/eggnog_Orthofinder/Eggnog.emapper.annotations" >> $working_folder"/eggnog_Orthofinder/Eggnog.emapper.go"
+fi
+
+################################################################################
+################################################################################
+################################################################################
+
+if [ "$ORTHOFINDER_EGGNOG_FOR_PHO" == "TRUE" ]
+then
+  working_folder=$orthofinder_folder
+  results_orthofinder=$(ls -d $orthofinder_folder"/OrthoFinder/Results_"*)
+
+  rm -r $working_folder"/eggnog_Orthofinder/For_Enrichment"
+  mkdir $working_folder"/eggnog_Orthofinder/For_Enrichment"
+
+  count=2
+  recorrer=$(grep -c . $results_orthofinder"/Phylogenetic_Hierarchical_Orthogroups/N0.tsv")
+
+  while [ $count -le $recorrer ]
+  do
+    pho=$(sed -n $count"p" $results_orthofinder"/Phylogenetic_Hierarchical_Orthogroups/N0.tsv" | awk -F "\t" '{print $1}')
+    sed -n $count"p" $results_orthofinder"/Phylogenetic_Hierarchical_Orthogroups/N0.tsv"  | tr "\t" "\n" | sed 1,3d | tr -d " " | tr "," "\n" | grep . > $working_folder"/eggnog_Orthofinder/For_Enrichment/Temp_file"
+    go_terms=$(grep -w -F -f $working_folder"/eggnog_Orthofinder/For_Enrichment/Temp_file" $working_folder"/eggnog_Orthofinder/Eggnog.emapper.go" | awk -F "\t" '{print $2}' | tr "," "\n" | sort -u | grep GO | tr "\n" "," | sed "s/,$//")
+
+    echo $pho" "$count"/"$recorrer
+    echo $pho" "$go_terms | tr " " "\t" >> $working_folder"/eggnog_Orthofinder/For_Enrichment/Background_PHO_All.txt"
+    count=$(($count + 1))
+  done
+fi
+
+################################################################################
+################################################################################
+################################################################################
+
 if [ "$CAFE_EXPANSION_PREPARE" == "TRUE" ]
 then
   explore_orthofinder=$orthofinder_folder
@@ -1776,41 +1822,6 @@ then
 
     emapper.py --override --cpu $threads -i $working_folder"/Sequences/"$seq"_interest.pep" -o $working_folder"/Eggnog_Species/"$seq"/"$seq --data_dir $eggnog_data
     awk -F "\t" '{print $1"\t"$10}' $working_folder"/Eggnog_Species/"$seq"/"$seq".emapper.annotations"  >> $working_folder"/Eggnog_Species/"$seq"/"$seq".emapper.go"
-  done
-fi
-
-################################################################################
-################################################################################
-################################################################################
-
-if [ "$CAFE_EXPANSION_ANOT_PREPARE_GO" == "TRUE" ]
-then
-  explore_orthofinder=$orthofinder_folder
-  results_orthofinder=$(ls -d $explore_orthofinder"/OrthoFinder/Results_"*)
-  working_folder=$orthofinder_folder"/CAFE_Expansion/DEF_Run"
-
-  rm -r $working_folder"/GO_TERM"
-  mkdir $working_folder"/GO_TERM"
-
-  species=$(ls $working_folder"/Sequences/"*".pep" | sed "s/_interest.pep//" | sed "s/.*\///")
-  hog_fam=$(ls $working_folder"/Sequences/Per_Family/"*".pep" | sed "s/.pep//" | sed "s/.*\///")
-
-  for hog in $hog_fam
-  do
-    echo $hog
-    go_resitry=
-    for spe in $species
-    do
-      spe_num=$(grep $spe $explore_orthofinder"/CAFE_Expansion/Temporal/Column_Order.temp" | awk -F "\t" '{print $2}')
-      genes=$(grep -F -w $hog $results_orthofinder"/Phylogenetic_Hierarchical_Orthogroups/N0.tsv" | tr "\t" "\n" | sed -n $spe_num"p" | tr -d " " | tr "," "\n" | grep .)
-      for gen in $genes
-      do
-        go_in_spe=$(grep -w -F $gen $working_folder"/Eggnog_Species/"$spe"/"$spe".emapper.go" | awk -F "\t" '{print $2}' | grep GO | tr "," "\n")
-        go_resitry=$(echo $go_resitry" "$go_in_spe)
-      done
-    done
-    go_resitry=$(echo $go_resitry | tr " " "\n" | sort -u | tr "\n" "," | sed "s/,$//" | sed "s/^,//")
-    echo $hog" "$go_resitry | tr " " "\t" >> $working_folder"/GO_TERM/GO_Terms.txt"
   done
 fi
 
