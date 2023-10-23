@@ -52,6 +52,7 @@ Setting this variable to TRUE will remove adapter sequences and low quality base
 - raw_illumina_reads_dir: Full path to the folder with the Illumina read files 
 - raw_illumina_1: Identifier for the Left reads, located at the end of the file 
 - raw_illumina_2: Identifier for the Left reads, located at the end of the file
+- Illumina_adapters: Full path to a fasta file with Illumina adapters (TruSeq3-PE-2.fa, included as trimmomatic's annotation)
 Note: Sample names are identified running the comand:
 ls $raw_illumina_reads_dir"/"*$raw_illumina_1 | sed "s/.*\///" | sed "s/$raw_illumina_1//"
 
@@ -113,6 +114,18 @@ Setting this variable to TRUE will map paired Illumina reads to the mitochondria
 - mito_htseq_illumina_gff: Full path to a GFF file with annotated mitochondrial genome
 
 Note: For convininence mito_htseq_illumina_gff has every feature identidied as a "gene" (third column of the gff) to better identify reads that overlap different features.
+
+### MAP_MITOCHONDRIA_PACBIO_NEW_ORIGIN
+Setting this variable to TRUE will run the same analysis than MAP_MITOCHONDRIA_PACBIO  but over a genome file with a different origin coordinate
+#### Required software: 
+- minimap2 (https://github.com/lh3/minimap2)
+- samtools (https://github.com/samtools/samtools)
+- htseq-count (https://github.com/htseq/htseq)
+#### Other Variables:
+- new_ori_genome: Full path to a fasta file with the conting/scaffold with the mitochondrial genome
+- new_ori_gff: Full path to a GFF file with annotated mitochondrial genome
+
+Note: This was done for quality control
 
 ### 11) MAP_MITOCHONDRIA_ILLUMINA_NEW_ORIGIN
 Setting this variable to TRUE will run the same analysis than MAP_MITOCHONDRIA_ILLUMINA but over a genome file with a different origin coordinate
@@ -257,14 +270,14 @@ Setting this variable to TRUE will identify candidates members of the CREP, FREP
 - BLAST+ (http://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs)
 #### Other Variables: 
 - crep_frep_grep_blast_ident: Identity cutoff for the BLAST search against known members of these families.
-- Fibrinogen_signatures: List separated by white spaces of interpro signatures associated with FBD domains
+- FBD_signatures: List separated by white spaces of interpro signatures associated with FBD domains
 - C_lectin_signatures: List separated by white spaces of interpro signatures associated with c-lectin domains
 - Galectin_signatures: List separated by white spaces of interpro signatures associated with galectin domains
 - EGF_signatures_signatures: List separated by white spaces of interpro signatures associated with EGF domains
 - Inmunoglobulin_signatures: List separated by white spaces of interpro signatures associated with Inmunoglobulin domains
-- Dheilly_CREP_prott: Fasta file with reference CREP sequences taken from (doi: 10.1016/j.dci.2014.10.009)
-- Dheilly_GREP_prott: Fasta file with reference GREP sequences taken from (doi: 10.1016/j.dci.2014.10.009)
-- Dheilly_FREP_prott: Fasta file with reference FREP sequences taken from (doi: 10.1016/j.dci.2014.10.009)
+- Dheilly_CREP_prot: Fasta file with reference CREP sequences taken from (doi: 10.1016/j.dci.2014.10.009)
+- Dheilly_GREP_prot: Fasta file with reference GREP sequences taken from (doi: 10.1016/j.dci.2014.10.009)
+- Dheilly_FREP_prot: Fasta file with reference FREP sequences taken from (doi: 10.1016/j.dci.2014.10.009)
 - Lu_FREP_prot: Fasta file with reference FREP sequences taken from  (https://doi.org/10.1371/journal.pntd.0008780)
 
 Note1: See main manuscript for the full description of the selecction procedure. Some of the sources of evidence were carried out as diagnostics.
