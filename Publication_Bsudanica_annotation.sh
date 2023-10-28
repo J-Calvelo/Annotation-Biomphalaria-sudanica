@@ -1462,7 +1462,7 @@ then
   rm $work_dir"/Final_Anotation_Files/Paper_Special_Tables/interpro.temp"
 
   families=$(echo "CREP FREP GREP")
-  echo "Protein_ID Family Final_Selection Analysis Signature_accession Score Start End InterPro_annotation Description Signature_Type Final_Selection" | tr " " "\t"  >> $work_dir"/Final_Anotation_Files/Paper_Special_Tables/CREP_FREP_GREP_Sup_Table.txt"
+  echo "Protein_ID Family Final_Selection Analysis Signature_accession Score Start End InterPro_annotation Description Signature_Type" | tr " " "\t"  >> $work_dir"/Final_Anotation_Files/Paper_Special_Tables/CREP_FREP_GREP_Sup_Table.txt"
   for fam in $families
   do
     protein_candidates=$(grep "Protein:" $work_dir"/FREP_like_Search/Best_Candidates_ReviewNeded/"$fam"_candidates_domain_locations.tab" | awk -F " " '{print $2}')
@@ -1481,7 +1481,7 @@ then
       check_signal_peptide=$(grep -w -F -c $prot $work_dir"/Location_Signals/SignalP_results.txt")
       if [ $check_signal_peptide -gt 0 ]
       then
-        sp_coords=$(grep -w -F $prot $work_dir"/Location_Signals/SignalP_results.txt"  | awk -F "\t" '{print $5}' | awk -F " " '{print $3}' | sed "s/.$//" | tr "-" ";")
+        sp_coords=$(grep -w -F $prot $work_dir"/Location_Signals/SignalP_results.txt"  | awk -F "\t" '{print $5}' | awk -F " " '{print $3}' | sed "s/.$//" | awk -F "-" '{print "1;"$1}')
         probability=$(grep -w -F $prot $work_dir"/Location_Signals/SignalP_results.txt"  | awk -F "\t" '{print $4}')
         echo $prot";"$fam";"$is_final_set";SignalP;SP;"$probability";"$sp_coords";NA;NA;Secreted Protein" | tr ";" "\t" >> $work_dir"/Final_Anotation_Files/Paper_Special_Tables/prot.temp"
       fi
@@ -1839,7 +1839,7 @@ then
   secretomep_prot=$(grep -w -v "Weighted_by_prior" $work_dir"/Location_Signals/SecretomeP_results.txt" | awk -F "\t" '{print $1}')
 
   work_genes=$(echo $signalp_prot" "$targetp_prot" "$secretomep_prot | tr " " "\n" | sort -u)
-  echo "ProtID Type Program Signal Prob/Score Details N_TMHMM Interprot_Data" | tr " " "\t" >> $work_dir"/Final_Anotation_Files/Paper_Special_Tables/Location_Signals_paper.tab"
+  echo "ProtID Type Program Signal Prob/Score Cleavage_Site_Information N_TMHMM Interprot_Data" | tr " " "\t" >> $work_dir"/Final_Anotation_Files/Paper_Special_Tables/Location_Signals_paper.tab"
   echo $work_genes | tr " " "\n" >> $work_dir"/Final_Anotation_Files/Paper_Special_Tables/genes.temp"
   grep -w -F -f $work_dir"/Final_Anotation_Files/Paper_Special_Tables/genes.temp" $work_dir"/Interprot_Results/Results.tsv" | awk -F "\t" '{if ($12!="-") print $1"\t"$12"("$13")"}' | sort -u >> $work_dir"/Final_Anotation_Files/Paper_Special_Tables/interprot.temp"
 
