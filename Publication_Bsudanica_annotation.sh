@@ -1434,7 +1434,15 @@ then
   run_frep_crep_phylogeny
 
   # 4) CREP
-  genes_Bsud=$(seqkit seq -n $work_dir"/FREP_like_Search/Best_Candidates_ReviewNeded/CREP_Full_candidates.aa" | awk -F "." '{print $1"."$2}' | sort -u | grep -w -F -v -f $exclude_seq_manual)
+  if [ -f $exclude_seq_manual]
+  then
+    echo "Excluding sequences on: "$exclude_seq_manual
+    genes_Bsud=$(seqkit seq -n $work_dir"/FREP_like_Search/Best_Candidates_ReviewNeded/CREP_Full_candidates.aa" | awk -F "." '{print $1"."$2}' | sort -u | grep -w -F -v -f $exclude_seq_manual)
+  else
+    echo "No file with manually excluded sequences at: "$exclude_seq_manual
+    genes_Bsud=$(seqkit seq -n $work_dir"/FREP_like_Search/Best_Candidates_ReviewNeded/CREP_Full_candidates.aa" | awk -F "." '{print $1"."$2}' | sort -u)
+  fi
+
   for gen in $genes_Bsud
   do
     echo $gen" CREP"
