@@ -306,7 +306,7 @@ Setting this variable to TRUE will align CREP and FREP sequences, trim them auto
 - Trimal (https://github.com/inab/trimal)
 - iqtree (https://github.com/iqtree/iqtree2)
 #### Other Variables: 
-- exclude_seq_manual: Full path to a file with protein ids manually removed.
+- exclude_seq_manual: Full path to a file with protein ids manually removed. File Exclude_CREP_FREP_GREP.txt
 
 ### 33) SUP_TAB_PAPER_CREP_FREP_GREP
 Setting this variable to TRUE will summirize the results in a table 
@@ -343,7 +343,7 @@ Setting this variable to TRUE will conduct one final run of CAFE5 that will be t
 - orthofinder_folder: Full path of the folder where the Orthofinder is going to be run
 - max_number_iterations: Makimun number of itterations done by CAFE5
 - Def_Kvalue: The best K-value identified in the test runs
-- interest_nodes_file: Full path to a file with the node names separated by tabs: "Biomphalaria_glabrata_IM_GCA_025434175.1        <0>"
+- interest_nodes_file: Full path to a file with the node names separated by tabs: "Biomphalaria_glabrata_IM_GCA_025434175.1        <0>". File Interest_nodes_CAFE.txt
 
 ### 37) CAFE_EXPANSION_ANOT_EGGNOG
 Setting this variable to TRUE will run EGGNOG for all sequences anlaysed by CAFE5.
