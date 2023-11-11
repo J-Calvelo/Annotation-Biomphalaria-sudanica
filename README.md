@@ -2,11 +2,11 @@
 Bioinformatic pipline utiliced in XXXXXX for the annotation of Biomphalaria sudanica.
 
 ## Publication_Bsudanica_annotation.sh
-The script is subdevided into several blocks of analysis and/or file preparation in order to facilitate re-runs. Which blocks are ran at a time can be controlled by setting to true variables located from lines 7 to 52 (all written in all caps). Other important variables for the run are located betwee lines 59 to 113. Some will be discussed now while others more specific will be mentioned as they become relevant:
+The script is subdevided into several blocks of analysis and/or file preparation in order to facilitate re-runs. Which blocks are ran at a time can be controlled by setting to true variables located from lines 7 to 52 (all written in all caps). Other important variables for the run are located betwee lines 59 to 113. Some will be discussed now while others more specific will be mentioned as they become relevant. Input files that are not third party databeses are included in: Other_Input_Files
 
 ### General variables:
 1) species_name: Name for the species being annotated
-2) genome_file: Full path to the genome assembly in fasta format
+2) genome_file: Full path to the genome assembly in fasta format. File available on the NCBI: SRRXXXXXX
 3) work_dir: Full path to the working directory (needs to exists
 4) threads: Number of computer cores available for the analysis. Used whenever possible.
 
@@ -40,8 +40,8 @@ Setting CLEAN_PACBIO_READS_RM_TM to TRUE will also remove intermediary files.
 - bam2fastq (https://github.com/jts/bam2fastq)
 - seqkit (https://github.com/shenwei356/seqkit)
 #### Other Variables:
-- raw_pacbio_reads: Full path to the PACBIO CCS reads file (BAM Format)
-- pacbio_primers: Full path to a file with the adapter sequences of the PACBIO CCS readss (FASTA Format)
+- raw_pacbio_reads: Full path to the PACBIO CCS reads file (BAM Format). Data available on the NCBI: SRRXXXXXX
+- pacbio_primers: Full path to a file with the adapter sequences of the PACBIO CCS readss in FASTA Format. File: Pacbio_adapters.fasta
   
 ### 5) CLEAN_ILLUMINA_READS 
 Setting this variable to TRUE will remove adapter sequences and low quality bases from the paired end Illumina reads using trimmomatic (SLIDINGWINDOW:5:20 MINLEN:25)
@@ -49,10 +49,10 @@ Setting this variable to TRUE will remove adapter sequences and low quality base
 - trimmomatic (https://github.com/usadellab/Trimmomatic)
 - seqkit (https://github.com/shenwei356/seqkit)
 #### Other Variables:
-- raw_illumina_reads_dir: Full path to the folder with the Illumina read files 
+- raw_illumina_reads_dir: Full path to the folder with the Illumina read files. Data available on the NCBI: SRRXXXXXX
 - raw_illumina_1: Identifier for the Left reads, located at the end of the file 
 - raw_illumina_2: Identifier for the Left reads, located at the end of the file
-- Illumina_adapters: Full path to a fasta file with Illumina adapters (TruSeq3-PE-2.fa, included as trimmomatic's annotation)
+- Illumina_adapters: Full path to a fasta file with Illumina adapters. File TruSeq3-PE-2.fa, included as trimmomatic's installation.
 Note: Sample names are identified running the comand:
 ls $raw_illumina_reads_dir"/"*$raw_illumina_1 | sed "s/.*\///" | sed "s/$raw_illumina_1//"
 
@@ -89,7 +89,7 @@ Setting FIND_MITOCHONDRIA_RM_TM to TRUE will also remove intermediary files.
 #### Required software: 
 - BLAST+ (http://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs)
 #### Other Variables:
-- mito_genes: Full path to a fasta file with known mitochondrial genes
+- mito_genes: Full path to a fasta file with known mitochondrial genes. File: Mitochondria_Coding_genes.fa
 
 Note: Other blocks working with the mitochondria will assume that it's sequence was retrieved and annotated by means not included on this pipeline.
 
@@ -100,8 +100,8 @@ Setting this variable to TRUE will map PACBIO reads to the mitochondrial genome 
 - samtools (https://github.com/samtools/samtools)
 - htseq-count (https://github.com/htseq/htseq)
 #### Other Variables:
-- mito_genome: Full path to a fasta file with the conting/scaffold with the mitochondrial genome
-- mito_gff: Full path to a GFF file with annotated mitochondrial genome
+- mito_genome: Full path to a fasta file with the conting/scaffold with the mitochondrial genome. File: Mitocondrial_genome.fa
+- mito_gff: Full path to a GFF file with annotated mitochondrial genome. File: Mitocondrial_htseq.gff
 
 ### 11) MAP_MITOCHONDRIA_ILLUMINA
 Setting this variable to TRUE will map paired Illumina reads to the mitochondrial genome and count reads asigned to the different features. 
@@ -110,8 +110,8 @@ Setting this variable to TRUE will map paired Illumina reads to the mitochondria
 - samtools (https://github.com/samtools/samtools)
 - htseq-count (https://github.com/htseq/htseq)
 #### Other Variables:
-- mito_genome: Full path to a fasta file with the conting/scaffold with the mitochondrial genome
-- mito_htseq_illumina_gff: Full path to a GFF file with annotated mitochondrial genome
+- mito_genome: Full path to a fasta file with the conting/scaffold with the mitochondrial genome. File: Mitocondrial_genome.fa
+- mito_htseq_illumina_gff: Full path to a GFF file with annotated mitochondrial genome (modified for convinience). File: Mitocondrial_htseq_Illumina.gff
 
 Note: For convininence mito_htseq_illumina_gff has every feature identidied as a "gene" (third column of the gff) to better identify reads that overlap different features.
 
@@ -122,8 +122,8 @@ Setting this variable to TRUE will run the same analysis than MAP_MITOCHONDRIA_P
 - samtools (https://github.com/samtools/samtools)
 - htseq-count (https://github.com/htseq/htseq)
 #### Other Variables:
-- new_ori_genome: Full path to a fasta file with the conting/scaffold with the mitochondrial genome
-- new_ori_gff: Full path to a GFF file with annotated mitochondrial genome
+- new_ori_genome: Full path to a fasta file with the conting/scaffold with the mitochondrial genome. File: Mitocondrial_New_Origin_genome.fasta
+- new_ori_gff: Full path to a GFF file with annotated mitochondrial genome. File: Mitocondrial_Mito_New_Origin_Htseq.gff
 
 Note: This was done for quality control
 
@@ -134,8 +134,8 @@ Setting this variable to TRUE will run the same analysis than MAP_MITOCHONDRIA_I
 - samtools (https://github.com/samtools/samtools)
 - htseq-count (https://github.com/htseq/htseq)
 #### Other Variables:
-- new_ori_genome: Full path to a fasta file with the conting/scaffold with the mitochondrial genome
-- new_ori_htseq_illumina_gff: Full path to a GFF file with annotated mitochondrial genome
+- new_ori_genome: Full path to a fasta file with the conting/scaffold with the mitochondrial genome. File: Mitocondrial_New_Origin_genome.fasta
+- new_ori_htseq_illumina_gff: Full path to a GFF file with annotated mitochondrial genome. File: Mitocondrial_Mito_New_Origin_Htseq.gff
 
 Note: This was done for quality control
 
@@ -146,9 +146,9 @@ Setting this variable to TRUE will run the first half of Transdecoder pipeline f
 - BLAST+ (http://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs)
 - hmmer (https://github.com/EddyRivasLab/hmmer/tree/master)
 #### Other Variables:
-- uniprot: Full path to a fasta file to reference proteins from Uniprot's Swiss-Prot database
+- uniprot: Full path to a fasta file to reference proteins from Uniprot's Swiss-Prot database. Check main manuscript for details.
 - transdecoder_evalue: Cut-off evalue used on the blastp search between the predicted proteins by TransDecoder.LongOrfs and the Uniprot reference
-- pfam: Full path to hmmer frofiles from Pfam-A
+- pfam: Full path to hmmer frofiles from Pfam-A. Check manuscript for details.
 - exclude_mitochondria: ID of the contig or scaffold that contains the mitochondrial genome. Any transcript assigned to it will not be analysed by trans-decoder
 
 ### 15) ORF_PROT_SEQ_2
@@ -242,7 +242,7 @@ Setting this variable to TRUE will identify IgSF domains based on custom hmmer p
 - seqkit (https://github.com/shenwei356/seqkit)
 - hmmer (https://github.com/EddyRivasLab/hmmer/tree/master)
 #### Other Variables:
-- igsf_hmmer_profile: Full path to a file with custom IgsF domains (IgSF1 and IgSF2). Originally designed in:  https://doi.org/10.1371/journal.pntd.0008780
+- igsf_hmmer_profile: Full path to a file with custom IgsF domains (IgSF1 and IgSF2). Originally designed in:  https://doi.org/10.1371/journal.pntd.0008780. File Bg_IgSF.hmm
 
 ### 27) PREPARE_ORTHOFINDER
 Setting this variable to TRUE will prepare the input files to run Orthofinder. It requires the specification of several folders with input data. The longest reported isoform of each nuclear gene will be selected.
@@ -253,7 +253,7 @@ Setting this variable to TRUE will prepare the input files to run Orthofinder. I
 #### Other Variables:
 - orthofinder_folder: Full path of the folder where the Orthofinder is going to be run
 - other_species_orthofinder: Full path to a folder with the cDNA where the Orthofinder is going to be run. Files inside must contain their cDNA and end in ".cds"
-- other_species_mitochondria: Full path to a file with mitochondrial sequences of the target species
+- other_species_mitochondria: Full path to a file with mitochondrial sequences of the target species. File Other_Species_Mitochondria.fasta
 - dash_ids: List separated by white species where Isoforms IDs fields are separated by "-" instead of "."
 
 ### 28) ORTHOFINDER
@@ -291,9 +291,9 @@ Setting this variable to TRUE will identify candidates members of the CREP, FREP
 - Galectin_signatures: List separated by white spaces of interpro signatures associated with galectin domains
 - EGF_signatures_signatures: List separated by white spaces of interpro signatures associated with EGF domains
 - Inmunoglobulin_signatures: List separated by white spaces of interpro signatures associated with Inmunoglobulin domains
-- Dheilly_CREP_prot: Fasta file with reference CREP sequences taken from (doi: 10.1016/j.dci.2014.10.009)
-- Dheilly_GREP_prot: Fasta file with reference GREP sequences taken from (doi: 10.1016/j.dci.2014.10.009)
-- Dheilly_FREP_prot: Fasta file with reference FREP sequences taken from (doi: 10.1016/j.dci.2014.10.009)
+- Dheilly_CREP_prot: Fasta file with reference CREP sequences taken from (doi: 10.1016/j.dci.2014.10.009). File: Dheilly_etal_2015_CREP.fa
+- Dheilly_FREP_prot: Fasta file with reference FREP sequences taken from (doi: 10.1016/j.dci.2014.10.009). File: Dheilly_etal_2015_FREP.fa
+- Dheilly_GREP_prot: Fasta file with reference GREP sequences taken from (doi: 10.1016/j.dci.2014.10.009). File:Dheilly_etal_2015_GREP.fa
 - Lu_FREP_prot: Fasta file with reference FREP sequences taken from  (https://doi.org/10.1371/journal.pntd.0008780)
 
 Note1: See main manuscript for the full description of the selecction procedure. Some of the sources of evidence were carried out as diagnostics.
