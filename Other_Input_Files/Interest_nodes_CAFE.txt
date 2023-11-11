@@ -1,0 +1,15 @@
+Biomphalaria_glabrata_IM_GCA_025434175.1	<0>
+Biomphalaria_glabrata_iBS90_GCA_025434165.1	<1>
+Biomphalaria_sudanica	<2>
+Biomphalaria_pfeifferi_SamTeam	<3>
+Biomphalaria_glabrata_VectorBaseBB02	<4>
+Bglabrata_NewLines	<5>
+African_Biomphalaria	<6>
+Bglabrata_All	<7>
+Internal_Bg_plus_African_Biom	<8>
+Biomphalaria_straminea_gigascience	<9>
+All_Biomphalaria	<10>
+Bulinus_truncatus_GCA_021962125.1	<11>
+Outgroup_Bl	<12>
+Elysia_marginata_GCA_019649035.1	<13>
+Root	<14>

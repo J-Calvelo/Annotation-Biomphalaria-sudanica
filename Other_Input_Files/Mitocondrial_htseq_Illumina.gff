@@ -1,0 +1,11 @@
+Mitocondria_seq	mitos	gene	57	1362	.	+	.	Name=nad4
+Mitocondria_seq	mitos	gene	1426	2201	.	-	.	Name=cox3
+Mitocondria_seq	mitos	gene	2307	3210	.	+	.	Name=nad2
+Mitocondria_seq	mitos	gene	3266	4792	.	+	.	Name=cox1
+Mitocondria_seq	mitos	gene	6023	8977	.	+	.	Name=nad_combo6-5-1
+Mitocondria_seq	BLAST	gene	9014	9284	.	+	.	Name=nad4l
+Mitocondria_seq	mitos	gene	9285	10368	.	+	.	Name=cob
+Mitocondria_seq	mitos	gene	10569	11220	.	+	.	Name=cox2
+Mitocondria_seq	mitos	gene	11583	11688	.	-	.	Name=atp8
+Mitocondria_seq	mitos	gene	11756	12395	.	-	.	Name=atp6
+Mitocondria_seq	mitos	gene	13272	13614	.	-	.	Name=nad3
