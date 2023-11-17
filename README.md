@@ -1,12 +1,12 @@
 # Annotation-Biomphalaria-sudanica
-Bioinformatic pipline utiliced in XXXXXX for the annotation of Biomphalaria sudanica.
+Bioinformatic pipline utiliced in XXXXX for the annotation of Biomphalaria sudanica.
 
 ## Publication_Bsudanica_annotation.sh
 The script is subdevided into several blocks of analysis and/or file preparation in order to facilitate re-runs. Which blocks are ran at a time can be controlled by setting to true variables located from lines 7 to 52 (all written in all caps). Other important variables for the run are located betwee lines 59 to 113. Some will be discussed now while others more specific will be mentioned as they become relevant. Input files that are not third party databeses are included in: Other_Input_Files
 
 ### General variables:
 1) species_name: Name for the species being annotated
-2) genome_file: Full path to the genome assembly in fasta format. File available on the NCBI: SRRXXXXXX
+2) genome_file: Full path to the genome assembly in fasta format. Data available on Bioproject: PRJNA1041389
 3) work_dir: Full path to the working directory (needs to exists
 4) threads: Number of computer cores available for the analysis. Used whenever possible.
 
@@ -40,7 +40,7 @@ Setting CLEAN_PACBIO_READS_RM_TM to TRUE will also remove intermediary files.
 - bam2fastq (https://github.com/jts/bam2fastq)
 - seqkit (https://github.com/shenwei356/seqkit)
 #### Other Variables:
-- raw_pacbio_reads: Full path to the PACBIO CCS reads file (BAM Format). Data available on the NCBI: SRRXXXXXX
+- raw_pacbio_reads: Full path to the PACBIO CCS reads file (BAM Format). Data available on the Bioproject: PRJNA1041389
 - pacbio_primers: Full path to a file with the adapter sequences of the PACBIO CCS readss in FASTA Format. File: Pacbio_adapters.fasta
   
 ### 5) CLEAN_ILLUMINA_READS 
@@ -49,7 +49,7 @@ Setting this variable to TRUE will remove adapter sequences and low quality base
 - trimmomatic (https://github.com/usadellab/Trimmomatic)
 - seqkit (https://github.com/shenwei356/seqkit)
 #### Other Variables:
-- raw_illumina_reads_dir: Full path to the folder with the Illumina read files. Data available on the NCBI: SRRXXXXXX
+- raw_illumina_reads_dir: Full path to the folder with the Illumina read files. Data available on the Bioproject: PRJNA1041389
 - raw_illumina_1: Identifier for the Left reads, located at the end of the file 
 - raw_illumina_2: Identifier for the Left reads, located at the end of the file
 - Illumina_adapters: Full path to a fasta file with Illumina adapters. File TruSeq3-PE-2.fa, included as trimmomatic's installation.
