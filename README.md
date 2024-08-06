@@ -1,5 +1,5 @@
 # Annotation-Biomphalaria-sudanica
-Bioinformatic pipline utiliced in XXXXX for the annotation of Biomphalaria sudanica.
+Bioinformatic pipline utiliced in: Pennance, T., Calvelo, J., Tennessen, J.A. et al. The genome and transcriptome of the snail Biomphalaria sudanica s.l.: immune gene diversification and highly polymorphic genomic regions in an important African vector of Schistosoma mansoni. BMC Genomics 25, 192 (2024). https://doi.org/10.1186/s12864-024-10103-w
 
 ## Publication_Bsudanica_annotation.sh
 The script is subdevided into several blocks of analysis and/or file preparation in order to facilitate re-runs. Which blocks are ran at a time can be controlled by setting to true variables located from lines 7 to 52 (all written in all caps). Other important variables for the run are located betwee lines 59 to 113. Some will be discussed now while others more specific will be mentioned as they become relevant. Input files that are not third party databeses are included in: Other_Input_Files
